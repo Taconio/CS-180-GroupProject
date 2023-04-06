@@ -31,7 +31,7 @@ public class Main {
                 scanner.nextLine();
                 String haveAccount = scanner.nextLine();
                 // ============ New Account ================== //
-                if (haveAccount.equals("N") || haveAccount.equals("n")) {
+                if (haveAccount.equalsIgnoreCase("N")) {
 
                     System.out.println("Please enter a username");
                     userName = scanner.nextLine();
@@ -39,7 +39,7 @@ public class Main {
                     password = scanner.nextLine();
                     // creates new customer object with the given strings as parameters
                     Customer customer = new Customer(userName, password);
-                    customer.listOfCustomers.add(customer);
+                    //customer.listOfCustomers.add(customer);
 
 
                     while (choiceOfAction != 2) {
@@ -218,7 +218,7 @@ public class Main {
                     // resets choice of action so it loops properly again
                     choiceOfAction = -1;
                 }
-                if (haveAccount.equals("Y") || haveAccount.equals("y")) {
+                if (haveAccount.equalsIgnoreCase("Y"))) {
                     System.out.println("Please enter your username");
                     userName = scanner.nextLine();
                     System.out.println("Please enter your password");
@@ -384,7 +384,7 @@ public class Main {
                 System.out.println("Do you already have an account? (Y/N)" );
                 scanner.nextLine();
                 String newAccount = scanner.nextLine();
-                if (newAccount.equals("N") || newAccount.equals("n")) {
+                if (newAccount.equalsIgnoreCase("N")) {
 
                     System.out.println("Please enter a username");
                     userName = scanner.nextLine();
@@ -572,7 +572,7 @@ public class Main {
 
 
                 }
-                if (newAccount.equals("Y") || newAccount.equals("y")) {
+                if (newAccount.equalsIgnoreCase("Y")) {
 
                 }
             }
