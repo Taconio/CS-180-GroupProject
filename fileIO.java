@@ -3,9 +3,15 @@ import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class fileIO {
-    public static void main(String[] args) {
 
+    public static void main(String[] args) {
+        
         Scanner scan = new Scanner(System.in);
+        System.out.println("Enter your username: (testing purposes only)");
+        String customerUsername = scan.nextLine();
+        System.out.println("Enter the username of the user you are importing the file: ");
+        String sellerUsername = scan.nextLine();
+
         System.out.println("File selection implementation: ");
         try {
             boolean existing = false;
@@ -45,15 +51,15 @@ public class fileIO {
             File customerFile = new File("marceloseller" + ".txt");
             PrintWriter pw = new PrintWriter(new FileOutputStream(customerFile,
                     true));
-            pw.println("usercustomer" + " sent file text to " + "seller" + " @ " +
+            pw.println(customerUsername + " sent file text to " + sellerUsername + " @ " +
                     LocalDateTime.now() + ": " + messageContent);
             pw.close();            //This would store messages customer receives
 
-            File conversation = new File("marcelo" + ";&;" + "marceloseller");
+            File conversation = new File(customerUsername + ";&;" + sellerUsername);
             if (!conversation.exists()) {
                 PrintWriter pw1 = new PrintWriter(new FileOutputStream(conversation,
                         true));
-                pw1.println("marcelo" + " sent file text to " + "marceloseller" + "@" +
+                pw1.println(customerUsername + " sent file text to " + sellerUsername + " @ " +
                         LocalDateTime.now() + ": " + messageContent);
                 pw1.close();
 
@@ -65,7 +71,7 @@ public class fileIO {
             } else {
                 PrintWriter pw1 = new PrintWriter(new FileOutputStream(conversation,
                         true));
-                pw1.println("marcelo" + " sent file text to " + "marceloseller" + "@" +
+                pw1.println(customerUsername + " sent file text to " + sellerUsername + "@" +
                         LocalDateTime.now() + ": " + messageContent);
                 pw1.close();
             }
@@ -83,7 +89,7 @@ public class fileIO {
         if (blockingSelection == 1){
             System.out.println("What is the username of the user you want to block?:");
             String usernameBlocking = scan.nextLine();
-            String line = "user1" + ",blocks," + usernameBlocking;
+            String line = customerUsername + ",blocks," + usernameBlocking;
 
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter("blockingList.txt", true));
@@ -99,14 +105,14 @@ public class fileIO {
         } else if (blockingSelection == 2) {
             System.out.println("What is the username of the user you want to become invisible to? :\n");
             String usernameInvisible = scan.nextLine();
-            String line = "user1" + ",invisible," + usernameInvisible;
+            String line = usernameInvisible + ",invisible," + usernameInvisible;
 
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter("blockingList.txt", true));
                 writer.append(line);
                 writer.newLine();
                 writer.close();
-                System.out.println("User " + "user1" + " is now invisible to user " + usernameInvisible);
+                System.out.println("User " + "username" + " is now invisible to user " + usernameInvisible);
             } catch (IOException e) {
                 System.out.println("An error occurred while writing to the file.");
                 e.printStackTrace();
