@@ -13,6 +13,36 @@ public class Customer {
         this.password = password;
         listOfSellers = new ArrayList<>();
 
+                String var10002;
+                Customer var20;
+                ArrayList var37;
+                ArrayList var38;
+                int var39;
+                label510:
+                do {
+                    while(true) {
+                        System.out.println("Welcome to the messaging System");
+                        System.out.println("Are you a customer or seller? (1/2)");
+
+                        int var7;
+                        for(var7 = var1.nextInt(); var7 != 1 && var7 != 2; var7 = var1.nextInt()) {
+                            System.out.println("Please enter a valid input");
+                        }
+
+                        String var11;
+                        Iterator var12;
+                        Iterator var14;
+                        int var16;
+                        String var18;
+                        int var22;
+                        String var23;
+                        ArrayList var32;
+                        if (var7 == 1) {
+                            System.out.println("Do you already have an account? (Y/N)");
+                            var1.nextLine();
+                            var8 = var1.nextLine();
+                            if (var8.equals("N") || var8.equals("n")) {
+                                System.out.println("Please enter a username");
         listOfSellers.add(new Seller("Bob", "123"));
         listOfSellers.add(new Seller("William", "123"));
         listOfSellers.add(new Seller("Rachel", "123"));
