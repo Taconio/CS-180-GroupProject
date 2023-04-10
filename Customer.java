@@ -2,32 +2,35 @@ import java.util.*;
 import java.io.*;
 
 /**
- * Runs our project for CS180 Spring 2023
+ * Customer Class for our CS group project.
  *
- * @author Group #
- * @date 04-08-2023
+ * @author Parth Thakre, Anthony Rodriguez, Will Greenwood, Marcelo Moreno, Ji Bing Ni
+ * @version 04-10-2023
  */
 
 public class Customer {
     private String username;
     private String password;
+    private String email;
     private String[] messagedSellers;
 
     /*
         For new accounts
      */
-    public Customer(String username, String password) {
+    public Customer(String username, String password, String email) {
         this.username = username;
         this.password = password;
+        this.email = email;
         messagedSellers = null;
     }
 
     /*
         For prexisting accounts
      */
-    public Customer(String username, String password, String[] messagedSellers) {
+    public Customer(String username, String password, String email, String[] messagedSellers) {
         this.username = username;
         this.password = password;
+        this.email = email;
         this.messagedSellers = messagedSellers;
     }
 
@@ -41,6 +44,10 @@ public class Customer {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public void setPassword(String password) {
@@ -72,7 +79,7 @@ public class Customer {
                     break;
                 String messageList = bfr.readLine();
                 String[] userInfo = line.split(",");
-                if (messagedSellers != null && userInfo[2].equals("Seller") && !messageList.contains(username)) {
+                if (messagedSellers != null && userInfo[3].equals("Seller") && !messageList.contains(username)) {
                     for (int i = 0; i < messagedSellers.length; i++) {
                         if (messagedSellers[i].equals(userInfo[0])) {
                             if (messageList.equals("null"))
@@ -91,7 +98,7 @@ public class Customer {
             e.printStackTrace();
         }
 
-        String userInfo = username + "," + password + "," + "Customer";
+        String userInfo = username + "," + password + "," + email + "," +"Customer";
         String messages = "";
         if (messagedSellers == null)
             messages = "null";
