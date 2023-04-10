@@ -19,6 +19,10 @@ public class Main {
     private ArrayList<Customer> customers;
     private ArrayList<Seller> sellers;
 
+    private ArrayList<Seller> blockedSellers;
+
+    private ArrayList<Customer> blockedCustomers;
+
 
     /*
         Intializes fields for later use
@@ -29,6 +33,8 @@ public class Main {
         oppositeUsers = new ArrayList<String>();
         customers = new ArrayList<Customer>();
         sellers = new ArrayList<Seller>();
+        blockedSellers = new ArrayList<Seller>();
+        blockedCustomers = new ArrayList<Customer>();
     }
 
     /*
@@ -81,6 +87,7 @@ public class Main {
         int newAcc;
         boolean login;
         String sendMessageTo;
+        messages.clear();
         do {
             System.out.println("Do you already have an account? \n1. Yes\n2. No");
             newAcc = scanner.nextInt();
@@ -104,10 +111,11 @@ public class Main {
             do {
                 System.out.println("Please enter your choice of action:");
                 System.out.println("1. Message sellers");
-                System.out.println("2. Log out ");
+                System.out.println("2. Block customer/Unblock customer");
+                System.out.println("3. Log out ");
                 userChoice = scanner.nextInt();
                 scanner.nextLine();
-            } while (userChoice != 2 && userChoice != 1);
+            } while (userChoice != 3 && userChoice != 2 && userChoice != 1);
             //Pulls up existing seller messages
             if (userChoice == 1) { // if user picks to message, it will go through checks to decide how messaging is set
                 if (messages.size() != 0) { //checks if the account has prexisting messages
@@ -149,7 +157,7 @@ public class Main {
                             throw new RuntimeException(e);
                         }
                         String existingInfo = (count + "$" + countSelfMessages +
-                                "%Seller: " + name + " - Store: " + findSellerStore(name) +" - Stats: Seller sent "
+                                "%Seller: " + name + " - Store: " + findSellerStore(name) + " - Stats: Seller sent "
                                 + count + " messages total, You sent " + countSelfMessages + " mesages total");
                         toSort1.add(existingInfo);
                         sortedList.add(existingInfo);
@@ -247,11 +255,11 @@ public class Main {
                         do {
                             System.out.println("What would you like to do? \n1. Send message" +
                                     "\n2. Edit message\n3. Delete message" +
-                                    "\n4. Export conversation to CSV\n5. Exit");
+                                    "\n4. Export conversation to CSV\n5. Import file\n6. Exit");
                             sendMessage = scanner.nextInt();
                             scanner.nextLine();
                         } while (sendMessage != 1 && sendMessage != 2 && sendMessage != 3 && sendMessage != 4 &&
-                                sendMessage != 5);
+                                sendMessage != 5 && sendMessage != 6);
                         if (sendMessage == 1) {
                             System.out.println("Enter the message you would like to send.");
                             String send = scanner.nextLine();
@@ -308,6 +316,74 @@ public class Main {
                             String conversationFile = conversation.get(0).substring(conversation.get(0).indexOf(":") +
                                     2);
                             csvExport(conversationFile);
+                        } else if (sendMessage == 5) {
+                            System.out.println("File import!");
+                            try {
+                                boolean existing = false;
+                                StringBuilder messageContent = new StringBuilder();
+                                String messageLine;
+                                do {
+                                    System.out.println("Please enter a file to import: ");
+                                    String fileName = scanner.nextLine();
+                                    if (fileName.equals("")) {
+                                        System.out.println("Enter a valid file!");
+                                    } else
+                                        try {
+                                            File f = new File(fileName);
+                                            if (f.exists()) {
+                                                existing = true;
+                                                BufferedReader bfr2 =
+                                                        new BufferedReader(new FileReader(fileName));
+
+                                                while ((messageLine = bfr2.readLine()) != null) {
+                                                    messageContent.append(messageLine + " ");
+                                                }
+                                                bfr2.close();
+                                                System.out.println("File content sent successfully!");
+
+                                            } else {
+                                                System.out.println("This file does not exist! " +
+                                                        "Please enter a valid file name:");
+                                            }
+
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            return;
+                                        }
+
+                                } while (!existing);
+
+
+                                File conversationFile = new File(currentUser + "&" + sendMessageTo + ".txt");
+                                if (!conversationFile.exists()) {
+                                    PrintWriter pw1 = new PrintWriter(new FileOutputStream(conversationFile,
+                                            true));
+                                    DateTimeFormatter globalFormat =
+                                            DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                                    ZonedDateTime currentISTime = ZonedDateTime.now();
+                                    ZonedDateTime currentETime =
+                                            currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                                    String timeStamp = globalFormat.format(currentETime);
+
+                                    pw1.println(timeStamp + "," + currentUser + ": " + messageContent);
+                                    pw1.close();
+                                } else {
+                                    PrintWriter pw1 = new PrintWriter(new FileOutputStream(conversationFile,
+                                            true));
+                                    DateTimeFormatter globalFormat =
+                                            DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                                    ZonedDateTime currentISTime = ZonedDateTime.now();
+                                    ZonedDateTime currentETime =
+                                            currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                                    String timeStamp = globalFormat.format(currentETime);
+
+                                    pw1.println(timeStamp + "," + currentUser + ": " + messageContent);
+                                    pw1.close();
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 } else {    //this is for  entirely new accounts to send messages.
@@ -342,6 +418,63 @@ public class Main {
                     writeConversation("Seller", sendMessageTo); // writes the conversation into the file
                 }
 
+            } else if (userChoice == 2) {
+                if (sellers.size() == 0 && blockedSellers.size() == 0) {
+                    System.out.println("Error! No sellers can be blocked or unblocked! Try again later! ");
+                    currentUser = null;
+                    return;
+                }
+                System.out.println("Unblocked Sellers:");
+                for (int i = 0; i < sellers.size(); i++)
+                    System.out.println("Customer: " + sellers.get(i).getUsername());
+                System.out.println("Blocked Sellers: ");
+                for (int i = 0; i < blockedSellers.size(); i++)
+                    System.out.println("Customer: " + blockedSellers.get(i).getUsername());
+                System.out.println("Enter name of seller to block or unblock.");
+                String toBlock = scanner.nextLine();
+                boolean doneBlocking = false;
+                for (int i = 0; i < sellers.size(); i++) {
+                    if (sellers.get(i).getUsername().equals(toBlock)) {
+                        messages.remove(toBlock);
+                        blockedSellers.add(sellers.get(i));
+                        sellers.remove(i);
+                        doneBlocking = true;
+                    }
+                }
+                if (doneBlocking)
+                    System.out.println("Successfully Blocked!");
+                else {
+                    for (int i = 0; i < blockedSellers.size(); i++) {
+                        if (blockedSellers.get(i).getUsername().equals(toBlock)) {
+                            sellers.add(blockedSellers.get(i));
+                            blockedSellers.remove(i);
+                            doneBlocking = true;
+                        }
+                    }
+                    if (doneBlocking)
+                        System.out.println("Successfully Unblocked! Rerun the program to load messages with newly" +
+                                " unblocked user");
+                    else {
+                        System.out.println("Error! Couldn't block the listed user");
+                        currentUser = null;
+                        return;
+                    }
+                }
+                if (messages.size() > 0) {
+                    Set<String> keys = messages.keySet();
+                    Iterator<String> i = keys.iterator();
+                    String[] messagesWith = new String[messages.size()];
+                    for (int x = 0; x < messages.size(); x++)
+                        messagesWith[x] = i.next();
+                    seller.setMessagedCustomers(messagesWith);
+                }
+                String[] blockedUsers = new String[blockedSellers.size()];
+                for (int i = 0; i < blockedSellers.size(); i++) {
+                    blockedUsers[i] = blockedSellers.get(i).getUsername();
+                }
+                customer.setBlockedSellers(blockedUsers);
+                customer.updateInfo();
+
             } else { // saves the new people talked to into the updateinfo.txt file.
                 if (messages.size() > 0) {
                     Set<String> keys = messages.keySet();
@@ -360,10 +493,10 @@ public class Main {
         To be implemented but it handles the seller side of things with similar implementation as the customer method.
      */
     public void handleSeller(Scanner scanner) {
-
         int newAcc;
         boolean login;
         String sendMessageTo;
+        messages.clear();
         do {
             System.out.println("Do you already have an account? \n1. Yes\n2. No");
             newAcc = scanner.nextInt();
@@ -386,10 +519,11 @@ public class Main {
             do {
                 System.out.println("Please enter your choice of action:");
                 System.out.println("1. Message customers");
-                System.out.println("2. Log out ");
+                System.out.println("2. Block customer/Unblock customer");
+                System.out.println("3. Log out");
                 userChoice = scanner.nextInt();
                 scanner.nextLine();
-            } while (userChoice != 2 && userChoice != 1);
+            } while (userChoice != 3 && userChoice != 2 && userChoice != 1);
             //Pulls up existing seller messages
             if (userChoice == 1) { // if user picks to message, it will go through checks to decide how messaging is set
                 if (messages.size() != 0) { //checks if the account has prexisting messages
@@ -407,7 +541,8 @@ public class Main {
                         FileInputStream fileInputStream = null;
                         ArrayList<String> commonWords = new ArrayList<>();
                         try {
-                            //Gets statistics for number of messages the customer sent and most frequent word in the conversation
+                            //Gets statistics for number of messages the customer sent and most frequent word in the
+                            // conversation
                             fileInputStream = new FileInputStream(filename);
                             BufferedReader bfr = new BufferedReader(new InputStreamReader(fileInputStream));
                             bfr.readLine();
@@ -416,7 +551,7 @@ public class Main {
                                 String senderName = line.substring(line.indexOf(",") + 1, line.indexOf(": "));
                                 String contents = line.substring(line.indexOf(": ") + 2);
                                 String words[] = contents.toLowerCase().split("\\s+");
-                                for (String word: words) {
+                                for (String word : words) {
                                     int freqCount = freqWordCount(word, filename);
                                     if (freqCount > maxCount) {
                                         commonWords.clear();
@@ -453,7 +588,8 @@ public class Main {
                     }
                     //Asks user if they would like to sort the messages by number of messages received
 
-                    System.out.println("Would you like to sort existing customer messages by number of messages received?");
+                    System.out.println("Would you like to sort existing customer messages by number of messages " +
+                            "received?");
                     System.out.println("1. Yes");
                     System.out.println("2. No");
                     String cont = scanner.nextLine();
@@ -520,11 +656,13 @@ public class Main {
                         int sendMessage;
                         do {
                             System.out.println("What would you like to do? \n1. Send message" +
-                                    "\n2. Edit message\n3. Delete message\n4. Export conversation to CSV\n5. Exit");
+                                    "\n2. Edit message\n3. Delete message\n" +
+                                    "4. Export conversation to CSV\n5. File import" +
+                                    "\n6. Exit");
                             sendMessage = scanner.nextInt();
                             scanner.nextLine();
                         } while (sendMessage != 1 && sendMessage != 2 && sendMessage != 3 && sendMessage != 4 &&
-                                sendMessage != 5);
+                                sendMessage != 5 && sendMessage != 6);
                         if (sendMessage == 1) {
                             System.out.println("Enter the message you would like to send.");
                             String send = scanner.nextLine();
@@ -581,6 +719,76 @@ public class Main {
                             String conversationFile = conversation.get(0).substring(conversation.get(0).indexOf(":") +
                                     2);
                             csvExport(conversationFile);
+                        } else if (sendMessage == 5) {
+                            //This section will prompt the user for a file name, read the file and send it as a message
+                            //to the desired user.
+                            System.out.println("File import!");
+                            try {
+                                boolean existing = false;
+                                StringBuilder messageContent = new StringBuilder();
+                                String messageLine;
+                                do {
+                                    System.out.println("Please enter a file to import: ");
+                                    String fileName = scanner.nextLine();
+                                    if (fileName.equals("")) {
+                                        System.out.println("Enter a valid file!");
+                                    } else
+                                        try {
+                                            File f = new File(fileName);
+                                            if (f.exists()) {
+                                                existing = true;
+                                                BufferedReader bfr2 =
+                                                        new BufferedReader(new FileReader(fileName));
+
+                                                while ((messageLine = bfr2.readLine()) != null) {
+                                                    messageContent.append(messageLine + " ");
+                                                }
+                                                bfr2.close();
+                                                System.out.println("File content sent successfully!");
+
+                                            } else {
+                                                System.out.println("This file does not exist! " +
+                                                        "Please enter a valid file name:");
+                                            }
+
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            return;
+                                        }
+
+                                } while (!existing);
+
+
+                                File conversationFile = new File(sendMessageTo + "&" + currentUser + ".txt");
+                                if (!conversationFile.exists()) {
+                                    PrintWriter pw1 = new PrintWriter(new FileOutputStream(conversationFile,
+                                            true));
+                                    DateTimeFormatter globalFormat =
+                                            DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                                    ZonedDateTime currentISTime = ZonedDateTime.now();
+                                    ZonedDateTime currentETime =
+                                            currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                                    String timeStamp = globalFormat.format(currentETime);
+
+                                    pw1.println(timeStamp + "," + currentUser + ": " + messageContent);
+                                    pw1.close();
+                                } else {
+                                    PrintWriter pw1 = new PrintWriter(new FileOutputStream(conversationFile,
+                                            true));
+                                    DateTimeFormatter globalFormat =
+                                            DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                                    ZonedDateTime currentISTime = ZonedDateTime.now();
+                                    ZonedDateTime currentETime =
+                                            currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                                    String timeStamp = globalFormat.format(currentETime);
+
+                                    pw1.println(timeStamp + "," + currentUser + ": " + messageContent);
+                                    pw1.close();
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 } else {    //this is for  entirely new accounts to send messages.
@@ -613,6 +821,62 @@ public class Main {
                     messages.put(sendMessageTo, output); // saves the conversation with assigned user
                     writeConversation("Customer", sendMessageTo); // writes the conversation into the file
                 }
+            } else if (userChoice == 2) {
+                if (customers.size() == 0 && blockedCustomers.size() == 0) {
+                    System.out.println("Error! No customers can be blocked or unblocked! Try again later! ");
+                    currentUser = null;
+                    return;
+                }
+                System.out.println("Unblocked Customers:");
+                for (int i = 0; i < customers.size(); i++)
+                    System.out.println("Customer: " + customers.get(i).getUsername());
+                System.out.println("Blocked Customers: ");
+                for (int i = 0; i < blockedCustomers.size(); i++)
+                    System.out.println("Customer: " + blockedCustomers.get(i).getUsername());
+                System.out.println("Enter name of customer to block or unblock.");
+                String toBlock = scanner.nextLine();
+                boolean doneBlocking = false;
+                for (int i = 0; i < customers.size(); i++) {
+                    if (customers.get(i).getUsername().equals(toBlock)) {
+                        messages.remove(toBlock);
+                        blockedCustomers.add(customers.get(i));
+                        customers.remove(i);
+                        doneBlocking = true;
+                    }
+                }
+                if (doneBlocking)
+                    System.out.println("Successfully Blocked!");
+                else {
+                    for (int i = 0; i < blockedCustomers.size(); i++) {
+                        if (blockedCustomers.get(i).getUsername().equals(toBlock)) {
+                            customers.add(blockedCustomers.get(i));
+                            blockedCustomers.remove(i);
+                            doneBlocking = true;
+                        }
+                    }
+                    if (doneBlocking)
+                        System.out.println("Successfully Unblocked! Rerun the program to load messages with newly" +
+                                " unblocked user");
+                    else {
+                        System.out.println("Error! Couldn't block the listed user");
+                        currentUser = null;
+                        return;
+                    }
+                }
+                if (messages.size() > 0) {
+                    Set<String> keys = messages.keySet();
+                    Iterator<String> i = keys.iterator();
+                    String[] messagesWith = new String[messages.size()];
+                    for (int x = 0; x < messages.size(); x++)
+                        messagesWith[x] = i.next();
+                    seller.setMessagedCustomers(messagesWith);
+                }
+                String[] blockedUsers = new String[blockedCustomers.size()];
+                for (int i = 0; i < blockedCustomers.size(); i++) {
+                    blockedUsers[i] = blockedCustomers.get(i).getUsername();
+                }
+                seller.setBlockedCustomers(blockedUsers);
+                seller.updateInfo();
 
             } else { // saves the new people talked to into the updateinfo.txt file.
                 if (messages.size() > 0) {
@@ -746,19 +1010,33 @@ public class Main {
                 if (line == null)
                     break;
                 String messageList = bfr.readLine();
+                String blockedList = bfr.readLine();
                 String[] userMessages;
+                String[] blockedUsers;
                 if (messageList.equalsIgnoreCase("null"))
                     userMessages = null;
                 else userMessages = messageList.split(",");
+
+                if (blockedList.equalsIgnoreCase("null"))
+                    blockedUsers = null;
+                else blockedUsers = blockedList.split(",");
+
                 String[] userInfo = line.split(","); // splits the line to read type of user
 
-                if (userInfo[3].equals("Seller"))
-                    sellers.add(new Seller(userInfo[0], userInfo[1], userInfo[2], userInfo[4], userMessages));
-                else
-                    customers.add(new Customer(userInfo[0], userInfo[1], userInfo[2], userMessages));
+                if (userInfo[3].equals("Seller") && !blockedList.contains(currentUser))
+                    sellers.add(new Seller(userInfo[0], userInfo[1], userInfo[2], userInfo[4], userMessages,
+                            blockedUsers));
+                else if (userInfo[3].equals("Customer") && !blockedList.contains(currentUser))
+                    customers.add(new Customer(userInfo[0], userInfo[1], userInfo[2], userMessages, blockedUsers));
+                else if (userInfo[3].equals("Seller") && blockedList.contains(currentUser))
+                    blockedSellers.add(new Seller(userInfo[0], userInfo[1], userInfo[2], userInfo[4], userMessages,
+                            blockedUsers));
+                else if (userInfo[3].equals("Customer") && blockedList.contains(currentUser))
+                    blockedCustomers.add(new Customer(userInfo[0], userInfo[1], userInfo[2], userMessages,
+                            blockedUsers));
 
                 if (userInfo[3].equalsIgnoreCase(keyUser)) {
-                    if (messageList.contains(currentUser)) {
+                    if (messageList.contains(currentUser) && !blockedList.contains(currentUser)) {
                         readCoversation(keyUser, userInfo[0]);
                     }
                 }
@@ -855,6 +1133,7 @@ public class Main {
             e.printStackTrace();
         }
     }
+
     // Counts frequency of words in a file *used for stats
     public int freqWordCount(String word, String fileName) throws Exception {
         int count = 0;
