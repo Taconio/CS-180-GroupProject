@@ -1,92 +1,116 @@
-import java.util.ArrayList;
+import java.util.*;
+import java.io.*;
+
+/**
+ * Runs our project for CS180 Spring 2023
+ *
+ * @author Group #
+ * @date 04-08-2023
+ */
 
 public class Customer {
-    String userName;
-    String password;
-    ArrayList<Seller> listOfSellers;
-    ArrayList<Customer> listOfCustomers;
+    private String username;
+    private String password;
+    private String[] messagedSellers;
 
-    public ArrayList<ArrayList<String>> messages;
-    public boolean hasContact;
-    public Customer(String userName, String password) {
-        this.userName = userName;
+    /*
+        For new accounts
+     */
+    public Customer(String username, String password) {
+        this.username = username;
         this.password = password;
-        listOfSellers = new ArrayList<>();
-
-                String var10002;
-                Customer var20;
-                ArrayList var37;
-                ArrayList var38;
-                int var39;
-                label510:
-                do {
-                    while(true) {
-                        System.out.println("Welcome to the messaging System");
-                        System.out.println("Are you a customer or seller? (1/2)");
-
-                        int var7;
-                        for(var7 = var1.nextInt(); var7 != 1 && var7 != 2; var7 = var1.nextInt()) {
-                            System.out.println("Please enter a valid input");
-                        }
-
-                        String var11;
-                        Iterator var12;
-                        Iterator var14;
-                        int var16;
-                        String var18;
-                        int var22;
-                        String var23;
-                        ArrayList var32;
-                        if (var7 == 1) {
-                            System.out.println("Do you already have an account? (Y/N)");
-                            var1.nextLine();
-                            var8 = var1.nextLine();
-                            if (var8.equals("N") || var8.equals("n")) {
-                                System.out.println("Please enter a username");
-        listOfSellers.add(new Seller("Bob", "123"));
-        listOfSellers.add(new Seller("William", "123"));
-        listOfSellers.add(new Seller("Rachel", "123"));
-
-        // needs this but program is unable to run with it. (has to do with initializing new customers in the customer constructor)
-        /*listOfCustomers = new ArrayList<>();
-        listOfCustomers.add(new Customer("Billy", "123"));
-        listOfCustomers.add(new Customer("Max", "123"));
-        listOfCustomers.add(new Customer("Noah", "123"));*/
-
-        ArrayList<ArrayList<String>> messages = new ArrayList<ArrayList<String>>();
-        // need to add this into messages arraylist for looping functionality (temporary fix)
-        ArrayList<String> dummy = new ArrayList<>();
-        dummy.add("13475857");
-        messages.add(dummy);
-        this.messages = messages;
-
-        this.hasContact = false;
-
+        messagedSellers = null;
     }
-    public String getUserName() {
-        return userName;
+
+    /*
+        For prexisting accounts
+     */
+    public Customer(String username, String password, String[] messagedSellers) {
+        this.username = username;
+        this.password = password;
+        this.messagedSellers = messagedSellers;
     }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getPassword() {
         return password;
     }
-    public ArrayList<Seller> getListOfSellers() {
-        return listOfSellers;
-    }
-    public void viewListOfSellers() {
-        for (int i = 0; i < listOfSellers.size(); i++) {
-            System.out.println(i+1 + " " + listOfSellers.get(i).getName());
-        }
-    }
-    public void setHasContact(boolean condition) {
-        this.hasContact = condition;
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public ArrayList<Customer> getListOfCustomers() {
-        return listOfCustomers;
+    public String[] getMessagedSellers() {
+        return messagedSellers;
     }
-    public void viewListOfCustomers() {
-        for (int i = 0; i < listOfCustomers.size(); i++) {
-            System.out.println(i+1 + " " + listOfCustomers.get(i).getUserName());
+
+    public void setMessagedSellers(String[] messagedSellers) {
+        this.messagedSellers = messagedSellers;
+    }
+
+    /*
+        Reads all the information from update info, adds users name to other users conversation lists
+     */
+
+    public void updateInfo() {
+        File f = new File("UserInfo.txt");
+        ArrayList<String> newLines = new ArrayList<String>();
+        try {
+            FileReader fr = new FileReader(f);
+            BufferedReader bfr = new BufferedReader(fr);
+            while (true) {
+
+                String line = bfr.readLine(); // reads first line to check if the person is customer or seller
+                if (line == null)
+                    break;
+                String messageList = bfr.readLine();
+                String[] userInfo = line.split(",");
+                if (messagedSellers != null && userInfo[2].equals("Seller") && !messageList.contains(username)) {
+                    for (int i = 0; i < messagedSellers.length; i++) {
+                        if (messagedSellers[i].equals(userInfo[0])) {
+                            if (messageList.equals("null"))
+                                messageList = username;
+                            else
+                                messageList = messageList + "," + username;
+                        }
+                    }
+                }
+                if (!line.substring(0, line.indexOf(",")).equals(username)) {
+                    newLines.add(line);
+                    newLines.add(messageList);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String userInfo = username + "," + password + "," + "Customer";
+        String messages = "";
+        if (messagedSellers == null)
+            messages = "null";
+        else {
+            for (int i = 0; i < messagedSellers.length - 1; i++) {
+                messages = messages + messagedSellers[i] + ",";
+            }
+            messages += messagedSellers[messagedSellers.length - 1];
+        }
+        try {
+            FileOutputStream fos = new FileOutputStream(f);
+            PrintWriter pw = new PrintWriter(fos);
+            for (int i = 0; i < newLines.size(); i++)
+                pw.println(newLines.get(i));
+            pw.println(userInfo);
+            pw.println(messages);
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
