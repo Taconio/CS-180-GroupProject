@@ -222,6 +222,7 @@ public class Main {
                         }
                         if (unmessagedSellers.size() == 0) {
                             System.out.println("Error: No new sellers to be messaged! Try again later!");
+                            customer.updateInfo();
                             currentUser = null;
                             return;
                         }
@@ -390,6 +391,7 @@ public class Main {
                     ArrayList<String> sellerNames = new ArrayList<String>();
                     if (sellers.size() == 0) {
                         System.out.println("Error: No new sellers to be messaged! Try again later!");
+                        customer.updateInfo();
                         currentUser = null;
                         return;
                     }
@@ -625,6 +627,7 @@ public class Main {
                         }
                         if (unmessagedCustomers.size() == 0) {
                             System.out.println("Error: No new customers to be messaged! Try again later!");
+                            seller.updateInfo();
                             currentUser = null;
                             return;
                         }
@@ -795,6 +798,7 @@ public class Main {
                     ArrayList<String> customerNames = new ArrayList<String>();
                     if (customers.size() == 0) {
                         System.out.println("Error: No new customers to be messaged! Try again later!");
+                        seller.updateInfo();
                         currentUser = null;
                         return;
                     }
@@ -905,7 +909,19 @@ public class Main {
         String password = scanner.nextLine();
         System.out.println("Please enter an email: ");
         String email = scanner.nextLine();
-        readUsers("Seller");
+
+        File f = new File("UserInfo.txt");
+        if(f.exists())
+            readUsers("Seller");
+        else
+        {
+            try{
+                f.createNewFile();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            readUsers("Seller");
+        }
         for (int i = 0; i < customers.size(); i++) {
             if (customers.get(i).getUsername().equals(currentUser)) {
                 System.out.println("Username taken!");
@@ -928,7 +944,18 @@ public class Main {
         String email = scanner.nextLine();
         System.out.println("Please enter a store name: ");
         String storeName = scanner.nextLine();
-        readUsers("Customer");
+        File f = new File("UserInfo.txt");
+        if(f.exists())
+            readUsers("Customer");
+        else
+        {
+            try{
+                f.createNewFile();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            readUsers("Customer");
+        }
         for (int i = 0; i < sellers.size(); i++) {
             if (sellers.get(i).getUsername().equals(currentUser)) {
                 System.out.println("Username taken!");
