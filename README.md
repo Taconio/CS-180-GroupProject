@@ -36,8 +36,8 @@ Warnings:
 
 ## Vocarium Submissions
 _____________________
-Project Report Submission: <br />
-Project Workspace Submission:
+Project Report Submission: Will Greenwood <br />
+Project Workspace Submission: Parth Thakre
 
 ## Class Overview
 _____________________
