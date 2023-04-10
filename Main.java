@@ -115,10 +115,11 @@ public class Main {
                     Set<String> keys = messages.keySet();
                     Iterator<String> i = keys.iterator();
                     ArrayList<String> toSort1 = new ArrayList<>();
-
+                    ArrayList<String> sortedList = new ArrayList<>();
                     while (i.hasNext()) {
                         String name = i.next();
                         int count = 0;
+                        int countSelfMessages = 0;
                         String filename = currentUser + "&" + name + ".txt";
 
                         String mostCommonWord = "";
@@ -131,60 +132,66 @@ public class Main {
                             BufferedReader bfr1 = new BufferedReader(new InputStreamReader(fileInputStream));
                             bfr1.readLine();
                             String line = bfr1.readLine();
+
                             while (line != null) {
                                 String senderName = line.substring(line.indexOf(",") + 1, line.indexOf(": "));
                                 String contents = line.substring(line.indexOf(": ") + 2);
                                 String words[] = contents.toLowerCase().split("\\s+");
-                                for (String word: words) {
-                                    int freqCount = freqWordCount(word, filename);
-                                    if (freqCount > maxCount) {
-                                        commonWords.clear();
-                                        commonWords.add(word);
-                                        maxCount = freqCount;
-                                    } else if (freqCount == maxCount && !commonWords.contains(word)) {
-                                        commonWords.add(word);
-                                    }
-                                }
+
                                 if (senderName.equals(name)) {
                                     count++;
+                                } else {
+                                    countSelfMessages++;
                                 }
                                 line = bfr1.readLine();
                             }
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                        String com = "";
-                        for (int k = 0; k < commonWords.size(); k++) {
-                            com += commonWords.get(k);
-                            if (k < commonWords.size() - 1) {
-                                com += ", ";
-                            }
-                        }
-
-                        String existingInfo = (count + "$Seller: " + name + " - Store: " + findSellerStore(name) +" - Stats: Seller sent " + count + " messages total, Most frequent word/words in conversation: " + com);
+                        String existingInfo = (count + "$" + countSelfMessages + "%Seller: " + name + " - Store: " + findSellerStore(name) +" - Stats: Seller sent " + count + " messages total, You sent " + countSelfMessages + " mesages total");
                         toSort1.add(existingInfo);
+                        sortedList.add(existingInfo);
                     }
-                    ArrayList<String> sortedList = new ArrayList<>();
+
                     for (int ind = 0; ind < toSort1.size(); ind++) {
-                        System.out.println(toSort1.get(ind).substring(toSort1.get(ind).indexOf("$") + 1));
+                        System.out.println(toSort1.get(ind).substring(toSort1.get(ind).indexOf("%") + 1));
                     }
-                    //Asks user if they would like to sort the messages by number of messages received
-                    System.out.println("Would you like to sort existing customer messages by number of messages received?");
-                    System.out.println("1. Yes");
-                    System.out.println("2. No");
-                    String cont = scanner.nextLine();
-                    if (cont.equals("1")) {
-                        Collections.sort(toSort1, new Comparator<String>() {
-                            public int compare(String str1, String str2) {
-                                int num1 = Integer.parseInt(str1.split("\\$")[0]);
-                                int num2 = Integer.parseInt(str2.split("\\$")[0]);
-                                return num1 - num2;
+                    //Brings user to statistics dashboard
+                    //They can sort by messages sent, messages received, or continue
+                    String cont = null;
+                    do {
+                        System.out.println("Choose next action:");
+                        System.out.println("1. Sort by messages received");
+                        System.out.println("2. Sort by messages sent");
+                        System.out.println("3. Continue");
+                        cont = scanner.nextLine();
+                        if (cont.equals("1")) {
+                            Collections.sort(toSort1, new Comparator<String>() {
+                                public int compare(String str1, String str2) {
+                                    int num1 = Integer.parseInt(str1.split("\\$")[0]);
+                                    int num2 = Integer.parseInt(str2.split("\\$")[0]);
+                                    return num1 - num2;
+                                }
+                            });
+                            for (int p = 0; p < toSort1.size(); p++) {
+                                System.out.println(toSort1.get(p).substring(toSort1.get(p).indexOf("%") + 1));
                             }
-                        });
-                        for (int p = 0; p < toSort1.size(); p++) {
-                            System.out.println(toSort1.get(p).substring(toSort1.get(p).indexOf("$") + 1));
+                        } else if (cont.equals("2")) {
+                            Collections.sort(sortedList, new Comparator<String>() {
+                                @Override
+                                public int compare(String s1, String s2) {
+                                    int num1 = Integer.parseInt(s1.split("\\$")[1].split("%")[0]);
+                                    int num2 = Integer.parseInt(s2.split("\\$")[1].split("%")[0]);
+                                    return Integer.compare(num1, num2);
+                                }
+                            });
+                            for (int x = 0; x < sortedList.size(); x++) {
+                                System.out.println(sortedList.get(x).substring(sortedList.get(x).indexOf("%") + 1));
+                            }
+                        } else {
+
                         }
-                    }
+                    } while (!cont.equals("3"));
 
                     //Ask if they want to message prexisting people or add new person to message.
 
