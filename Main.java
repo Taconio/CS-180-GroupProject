@@ -93,6 +93,8 @@ public class Main {
         } while (newAcc != 2 && newAcc != 1);
         if (newAcc == 2) {
             makeNewCustomer(scanner);
+            if (currentUser == null)
+                return;
         }
         if (newAcc == 1) {
             login = loginCustomer(scanner);
@@ -504,6 +506,8 @@ public class Main {
         } while (newAcc != 2 && newAcc != 1);
         if (newAcc == 2) {
             makeNewSeller(scanner);
+            if (currentUser == null)
+                return;
         }
         if (newAcc == 1) {
             login = loginSeller(scanner);
@@ -909,13 +913,12 @@ public class Main {
         String email = scanner.nextLine();
 
         File f = new File("UserInfo.txt");
-        if(f.exists())
+        if (f.exists())
             readUsers("Seller");
-        else
-        {
-            try{
+        else {
+            try {
                 f.createNewFile();
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             readUsers("Seller");
@@ -943,13 +946,12 @@ public class Main {
         System.out.println("Please enter a store name: ");
         String storeName = scanner.nextLine();
         File f = new File("UserInfo.txt");
-        if(f.exists())
+        if (f.exists())
             readUsers("Customer");
-        else
-        {
-            try{
+        else {
+            try {
                 f.createNewFile();
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             readUsers("Customer");
