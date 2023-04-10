@@ -907,7 +907,7 @@ public class Main {
         String email = scanner.nextLine();
         readUsers("Seller");
         for (int i = 0; i < customers.size(); i++) {
-            if (customers.get(i).getUsername() == currentUser) {
+            if (customers.get(i).getUsername().equals(currentUser)) {
                 System.out.println("Username taken!");
                 currentUser = null;
                 return;
@@ -930,7 +930,7 @@ public class Main {
         String storeName = scanner.nextLine();
         readUsers("Customer");
         for (int i = 0; i < sellers.size(); i++) {
-            if (sellers.get(i).getUsername() == currentUser) {
+            if (sellers.get(i).getUsername().equals(currentUser)) {
                 System.out.println("Username taken!");
                 currentUser = null;
                 return;
