@@ -1,581 +1,855 @@
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
+import java.io.*;
+import java.time.*;
+import java.time.format.*;
+import java.util.Collections;
 
+/**
+ * Runs our project for CS180 Spring 2023
+ *
+ * @author Group #
+ * @date 04-08-2023
+ */
 public class Main {
+    private String currentUser;
+    private Customer customer;
+    private Seller seller;
+    private HashMap<String, ArrayList<String>> messages;
+    private ArrayList<String> oppositeUsers;
+    private ArrayList<Customer> customers;
+    private ArrayList<Seller> sellers;
 
-    // only creating a new customer option works (others options will run into issues that will be discussed soon)
 
+    /*
+        Intializes fields for later use
+     */
+    public Main() {
+        currentUser = "";
+        messages = new HashMap<String, ArrayList<String>>();
+        oppositeUsers = new ArrayList<String>();
+        customers = new ArrayList<Customer>();
+        sellers = new ArrayList<Seller>();
+    }
+
+    /*
+        Runs the program outside of the main method for ease of access
+     */
     public static void main(String[] args) {
-
         Scanner scanner = new Scanner(System.in);
+        Main main = new Main();
+        main.executeProgram(scanner);
+    }
 
-        int choiceOfAction = -1;
-        boolean validSeller = false;
-        boolean validCustomer = false;
-        String userName;
-        String password;
-
+    /*
+        Executes the program and handles based on what type of user is using the program
+     */
+    public void executeProgram(Scanner scanner) {
         while (true) {
-            // starting display
             System.out.println("Welcome to the messaging System");
-            System.out.println("Are you a customer or seller? (1/2)");
-            int userChoice = scanner.nextInt();
-            // checks for only a 1 or 2 response
-            while (userChoice != 1 && userChoice != 2) {
-                System.out.println("Please enter a valid input");
-                userChoice = scanner.nextInt();
-            }
-            // =================== Customer ======================= //
-            if (userChoice == 1) {
-                System.out.println("Do you already have an account? (Y/N)" );
+            int breakOut;
+            do {
+                System.out.println("Would you like to use this system? \n1. Yes\n2. No");
+                breakOut = scanner.nextInt();
                 scanner.nextLine();
-                String haveAccount = scanner.nextLine();
-                // ============ New Account ================== //
-                if (haveAccount.equalsIgnoreCase("N")) {
-
-                    System.out.println("Please enter a username");
-                    userName = scanner.nextLine();
-                    System.out.println("Please enter a password");
-                    password = scanner.nextLine();
-                    // creates new customer object with the given strings as parameters
-                    Customer customer = new Customer(userName, password);
-                    //customer.listOfCustomers.add(customer);
-
-
-                    while (choiceOfAction != 2) {
-                        System.out.println("Please enter your choice of action:");
-                        System.out.println("1. Message sellers");
-                        System.out.println("2. Log out ");
-                        choiceOfAction = scanner.nextInt();
-                        // ================ Message Functionality ============================ //
-                        if (choiceOfAction == 1) {
-                            System.out.println("Would you like to view list of sellers? (1) or search for sellers? (2)");
-                            int messageType = scanner.nextInt();
-
-                            // checks for only 1 or 2
-                            while (messageType != 1 && messageType != 2) {
-                                System.out.println("Please enter a valid number");
-                                messageType = scanner.nextInt();
-                            }
-                            if (messageType == 1) {
-                                System.out.println("Which seller would you like to message?");
-
-                                // displays list of available seller.
-                                customer.viewListOfSellers();
-                                scanner.nextLine();
-                                String choiceOfSeller = scanner.nextLine();
-
-                                System.out.println(choiceOfSeller);
-                                // loops through each available seller and makes sure the name matches a valid one
-                                for (Seller seller: customer.getListOfSellers()) {
-                                    if (seller.getName().equals(choiceOfSeller)) {
-                                        validSeller = true;
-                                    }
-                                }
-                                // if it does not match, prompts user to enter a valid one
-                                while (!validSeller) {
-                                    System.out.println("Please enter a valid seller name");
-                                    choiceOfSeller = scanner.nextLine();
-                                    for (Seller seller: customer.getListOfSellers())  {
-                                        if (seller.getName().equals(choiceOfSeller)) {
-                                            validSeller = true;
-                                        }
-                                    }
-                                }
-                                // sets to false for multiple loop uses
-                                validSeller = false;
-
-
-                                System.out.println("What is your choice of action with this seller?");
-                                System.out.println("1. Send message");
-                                System.out.println("2. Edit message");
-                                System.out.println("3. Delete message");
-                                System.out.println("4. Return back");
-                                int choiceOfActionP2 = scanner.nextInt();
-
-                                // ================ Send Message =========================== //
-                                if (choiceOfActionP2 == 1) {
-                                    // user input for message
-                                    System.out.println("What would you like to send");
-                                    scanner.nextLine();
-                                    String messageToSend = scanner.nextLine();
-
-                                    // goes through each available seller
-                                    A : for (Seller seller: customer.getListOfSellers()) {
-                                        // finds the correct seller that user wants to message
-                                        if (seller.getName().equals(choiceOfSeller)) {
-                                            // goes through the arraylist of arraylists
-                                            for (int i = 0; i < customer.messages.size(); i++) {
-                                                // finds the arraylist of messages which the first index matches the correct sellers name
-                                                // assumes that there is already a text history between the users
-                                                if (customer.messages.get(i).get(0).equals(seller.getName())) {
-                                                    System.out.println("Second Round");
-                                                    // adds the message into the array that has there text history already
-                                                    customer.messages.get(i).add(customer.getUserName() + ": " + messageToSend);
-                                                    // visual display on terminal (testing purposes)
-                                                    System.out.println(customer.messages);
-                                                    break A;
-                                                }
-                                                // if customer does not have text history and its we went through whole loop, create new message history with text and store it within the messages
-                                                if (!customer.hasContact && i == customer.messages.size() - 1 ) {
-                                                    System.out.println("first round!");
-                                                    // where we store the written text
-                                                    ArrayList<String> message = new ArrayList<>();
-                                                    // first slot is the name of the recipient (sorting / finding purposes)
-                                                    message.add(seller.getName());
-                                                    message.add(customer.getUserName() + ": " + messageToSend);
-                                                    // stores the string arraylist of text into an array list that stores  multiple arraylists of text (keeps history from each seller the user messgaes)
-                                                    customer.messages.add(message);
-                                                    // now customer has contact, no need to go through this initial condition
-                                                    customer.setHasContact(true);
-                                                    System.out.println(customer.messages);
-                                                    break A;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // sets it to false after sending message in case customer messages a new seller.
-                                    customer.setHasContact(false);
-                                    // ================ Send Message =========================== //
-
-                                    // ================ Edit Message =========================== //
-                                } else if (choiceOfActionP2 == 2) {
-                                    // user input for message to edit
-                                    System.out.println("Which message would you like to edit from this seller?");
-                                    scanner.nextLine();
-                                    String messageToEdit = scanner.nextLine();
-
-                                    // goes through each seller
-                                    for (Seller seller: customer.getListOfSellers()) {
-                                        // finds correct seller that user wants to message
-                                        if (seller.getName().equals(choiceOfSeller)) {
-                                            // goes through each arraylist in the arraylist of arraylists
-                                            for (int i = 0; i < customer.messages.size(); i++) {
-                                                // finds the arraylist of messages which the first index matches the correct seller's name
-                                                if (customer.messages.get(i).get(0).equals(seller.getName())) {
-                                                    // loops through each text that was sent
-                                                    for (int j = 1; j < customer.messages.get(i).size(); j++) {
-                                                        // if target text was found, prompts user to type in replacement message
-                                                        if (customer.messages.get(i).get(j).equals(customer.getUserName() + ": " + messageToEdit)) {
-                                                            System.out.println("What would you like to change it too?");
-                                                            String newMessage = scanner.nextLine();
-                                                            // replaces the old String message with new one
-                                                            customer.messages.get(i).set(customer.messages.get(i).indexOf(customer.getUserName() + ": " + messageToEdit),customer.getUserName() + ": "+ newMessage );
-                                                            System.out.println("Edit Successfully");
-                                                            // display the message data (test)
-                                                            System.out.println(customer.messages.get(i));
-                                                            // if no message is found and it comes to end of loop, display invalid message and breaks out of loop.
-                                                        } else if (!(customer.messages.get(i).get(j).equals(customer.getUserName() + ": " + messageToEdit)) && j == customer.messages.get(i).size() - 1) {
-                                                            System.out.println("Unable to find message");
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // ================ Edit Message =========================== //
-
-                                    // ================ Delete Message =========================== //
-                                } else if (choiceOfActionP2 == 3) {
-                                    System.out.println("Which message would you like to delete from this seller?");
-                                    scanner.nextLine();
-                                    String messageToDelete = scanner.nextLine();
-
-                                    // goes through each seller
-                                    for (Seller seller: customer.getListOfSellers()) {
-                                        // finds correct seller that user wants to message
-                                        if (seller.getName().equals(choiceOfSeller)) {
-                                            // goes through each arraylist in the arraylist of arraylists
-                                            for (int i = 0; i < customer.messages.size(); i++) {
-                                                // finds the arraylist of messages which the first index matches the correct seller's name
-                                                if (customer.messages.get(i).get(0).equals(seller.getName())) {
-                                                    // loops through each text that was sent
-                                                    for (int j = 1; j < customer.messages.get(i).size(); j++) {
-                                                        // if target text was found, removes that string from the specific arraylist of data
-                                                        if (customer.messages.get(i).get(j).equals(customer.getUserName() + ": "+ messageToDelete)) {
-                                                            customer.messages.get(i).remove(customer.getUserName() + ": "+ messageToDelete);
-                                                            System.out.println("Delete Successfully");
-
-                                                            System.out.println(customer.messages.get(i));
-
-                                                            // if no message is found and it comes to end of loop, display invalid message and breaks out of loop.
-                                                        } else if (!(customer.messages.get(i).get(j).equals(customer.getUserName() + ": "+ messageToDelete)) && j == customer.messages.get(i).size() - 1){
-                                                            System.out.println("Unable to find message");
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                // ================ Delete Message =========================== //
-
-                            }
-                        }
-                    }
-                    // resets choice of action so it loops properly again
-                    choiceOfAction = -1;
-                }
-                if (haveAccount.equalsIgnoreCase("Y"))) {
-                    System.out.println("Please enter your username");
-                    userName = scanner.nextLine();
-                    System.out.println("Please enter your password");
-                    password = scanner.nextLine();
-
-                    Customer customer = new Customer("dummy", "123");
-                    for (int ii = 0; ii < customer.getListOfCustomers().size(); ii++) {
-                        if (customer.getListOfCustomers().get(ii).getUserName().equals(userName) && customer.getListOfCustomers().get(ii).getPassword().equals(password)) {
-                            System.out.println("Login Success!");
-                            customer = customer.getListOfCustomers().get(ii);
-
-                            while (choiceOfAction != 2) {
-                                System.out.println("Please enter your choice of action:");
-                                System.out.println("1. Message sellers");
-                                System.out.println("2. Log out ");
-                                choiceOfAction = scanner.nextInt();
-                                // ================ Message Functionality ============================ //
-                                if (choiceOfAction == 1) {
-                                    System.out.println("Would you like to view list of sellers? (1) or search for sellers? (2)");
-                                    int messageType = scanner.nextInt();
-                                    while (messageType != 1 && messageType != 2) {
-                                        System.out.println("Please enter a valid number");
-                                        messageType = scanner.nextInt();
-                                    }
-                                    if (messageType == 1) {
-                                        System.out.println("Which seller would you like to message?");
-                                        // viewListOfSellers() should print out a list of available sellers that customer and contact
-                                        customer.viewListOfSellers();
-                                        scanner.nextLine();
-                                        String choiceOfSeller = scanner.nextLine();
-                                        System.out.println(choiceOfSeller);
-                                        for (Seller seller: customer.getListOfSellers()) {
-                                            if (seller.getName().equals(choiceOfSeller)) {
-                                                System.out.println("Matches");
-                                                validSeller = true;
-                                            }
-                                        }
-                                        while (!validSeller) {
-                                            System.out.println("Please enter a valid seller name");
-                                            choiceOfSeller = scanner.nextLine();
-                                            for (Seller seller: customer.getListOfSellers())  {
-                                                if (seller.getName().equals(choiceOfSeller)) {
-                                                    validSeller = true;
-                                                }
-                                            }
-                                        }
-                                        validSeller = false;
-                                        System.out.println("What is your choice of action with this customer?");
-                                        System.out.println("1. Send message");
-                                        System.out.println("2. Edit message");
-                                        System.out.println("3. Delete message");
-                                        System.out.println("4. Return back");
-                                        int choiceOfActionP2 = scanner.nextInt();
-                                        // ================ Send Message =========================== //
-                                        if (choiceOfActionP2 == 1) {
-                                            System.out.println("What would you like to send");
-                                            scanner.nextLine();
-                                            String messageToSend = scanner.nextLine();
-                                            System.out.println("Messages : " + customer.messages);
-                                            // getMessage should call an arrayList of Strings for adding purposes (data for storing text history)
-                                            A : for (Seller seller: customer.getListOfSellers()) {
-                                                if (seller.getName().equals(choiceOfSeller)) {
-                                                    for (int i = 0; i < customer.messages.size(); i++) {
-
-                                                        System.out.println("Seller: "+ seller.getName());
-                                                        System.out.println("Me: "+ customer.messages.get(i).get(0));
-
-                                                        if (customer.messages.get(i).get(0).equals(seller.getName())) {
-                                                            System.out.println("Second Round");
-                                                            customer.messages.get(i).add(customer.getUserName() + ": " + messageToSend);
-                                                            System.out.println(customer.messages);
-                                                            break A;
-                                                        }
-
-                                                        if (!customer.hasContact && i == customer.messages.size() - 1 ) {
-                                                            System.out.println("first round!");
-                                                            ArrayList<String> message = new ArrayList<>();
-                                                            message.add(seller.getName());
-                                                            message.add(customer.getUserName() + ": " + messageToSend);
-                                                            customer.messages.add(message);
-                                                            customer.setHasContact(true);
-                                                            System.out.println(customer.messages);
-                                                            break A;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            customer.setHasContact(false);
-                                            // ================ Send Message =========================== //
-
-                                            // ================ Edit Message =========================== //
-                                        } else if (choiceOfActionP2 == 2) {
-                                            System.out.println("Which message would you like to edit from this seller?");
-                                            scanner.nextLine();
-                                            String messageToEdit = scanner.nextLine();
-
-                                            for (Seller seller: customer.getListOfSellers()) {
-                                                if (seller.getName().equals(choiceOfSeller)) {
-                                                    for (int i = 0; i < customer.messages.size(); i++) {
-                                                        if (customer.messages.get(i).get(0).equals(seller.getName())) {
-                                                            for (int j = 1; j < customer.messages.get(i).size(); j++) {
-                                                                System.out.println(customer.messages.get(i).get(j));
-
-                                                                if (customer.messages.get(i).get(j).equals(customer.getUserName() + ": " + messageToEdit)) {
-                                                                    System.out.println("What would you like to change it too?");
-                                                                    String newMessage = scanner.nextLine();
-                                                                    customer.messages.get(i).set(customer.messages.get(i).indexOf(customer.getUserName() + ": " + messageToEdit),customer.getUserName() + ": "+ newMessage );
-                                                                    System.out.println("Edit Successfully");
-                                                                    System.out.println(customer.messages.get(i));
-                                                                } else if (!(customer.messages.get(i).get(j).equals(customer.getUserName() + ": " + messageToEdit)) && j == customer.messages.get(i).size() - 1) {
-                                                                    System.out.println("Unable to find message");
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            // ================ Edit Message =========================== //
-
-                                            // ================ Delete Message =========================== //
-                                        } else if (choiceOfActionP2 == 3) {
-                                            System.out.println("Which message would you like to delete from this seller?");
-                                            scanner.nextLine();
-                                            String messageToDelete = scanner.nextLine();
-
-                                            for (Seller seller: customer.getListOfSellers()) {
-                                                if (seller.getName().equals(choiceOfSeller)) {
-                                                    for (int i = 0; i < customer.messages.size(); i++) {
-                                                        if (customer.messages.get(i).get(0).contains(seller.getName())) {
-                                                            for (int j = 1; j < customer.messages.get(i).size(); j++) {
-                                                                System.out.println(customer.messages.get(i).get(j));
-                                                                if (customer.messages.get(i).get(j).equals(customer.getUserName() + ": "+ messageToDelete)) {
-                                                                    customer.messages.get(i).remove(customer.getUserName() + ": "+ messageToDelete);
-
-                                                                    System.out.println("Delete Successfully");
-                                                                    for (int k = 1; j < customer.messages.get(i).size(); k++) {
-                                                                        System.out.println(customer.messages.get(i).get(k));
-                                                                    }
-                                                                    System.out.println(customer.messages.get(i));
-                                                                } else if (!(customer.messages.get(i).get(j).equals(customer.getUserName() + ": "+ messageToDelete)) && j == customer.messages.get(i).size() - 1){
-                                                                    System.out.println("Unable to find message");
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        // ================ Delete Message =========================== //
-                                    }
-                                }
-                            }
-                        } else if (!(customer.getListOfCustomers().get(ii).getUserName().equals(userName) && customer.getListOfCustomers().get(ii).getPassword().equals(password)) && ii == customer.getListOfCustomers().size() - 1) {
-                            System.out.println("Login failed");
-                            break;
-                        }
-                    }
-                }
-                // =================== Seller ======================= //
-            } else {
-                System.out.println("Do you already have an account? (Y/N)" );
-                scanner.nextLine();
-                String newAccount = scanner.nextLine();
-                if (newAccount.equalsIgnoreCase("N")) {
-
-                    System.out.println("Please enter a username");
-                    userName = scanner.nextLine();
-                    System.out.println("Please enter a password");
-                    password = scanner.nextLine();
-
-                    Seller seller = new Seller(userName, password);
-                    seller.listOfSellers.add(seller);
-
-                    while (choiceOfAction != 2) {
-                        System.out.println("Please enter your choice of action:");
-                        System.out.println("1. Message customers");
-                        System.out.println("2. Log out ");
-                        choiceOfAction = scanner.nextInt();
-                        // ================ Message Functionality ============================ //
-                        if (choiceOfAction == 1) {
-                            System.out.println("Would you like to view list of customers? (1) or search for customers? (2)");
-                            int messageType = scanner.nextInt();
-
-                            // checks for only 1 or 2
-                            while (messageType != 1 && messageType != 2) {
-                                System.out.println("Please enter a valid number");
-                                messageType = scanner.nextInt();
-                            }
-                            if (messageType == 1) {
-                                System.out.println("Which customer would you like to message?");
-
-                                // displays list of available seller.
-                                seller.viewListOfCustomers();
-                                scanner.nextLine();
-                                String choiceOfCustomer = scanner.nextLine();
-
-                                System.out.println(choiceOfCustomer);
-                                // loops through each available seller and makes sure the name matches a valid one
-                                for (Customer customer: seller.getListOfCustomers()) {
-                                    if (customer.getUserName().equals(choiceOfCustomer)) {
-                                        validCustomer = true;
-                                    }
-                                }
-                                // if it does not match, prompts user to enter a valid one
-                                while (!validCustomer) {
-                                    System.out.println("Please enter a valid customer name");
-                                    choiceOfCustomer = scanner.nextLine();
-                                    for (Customer customer: seller.getListOfCustomers()) {
-                                        if (customer.getUserName().equals(choiceOfCustomer)) {
-                                            validSeller = true;
-                                        }
-                                    }
-                                }
-                                // sets to false for multiple loop uses
-                                validCustomer = false;
-
-
-                                System.out.println("What is your choice of action with this customer?");
-                                System.out.println("1. Send message");
-                                System.out.println("2. Edit message");
-                                System.out.println("3. Delete message");
-                                System.out.println("4. Return back");
-                                int choiceOfActionP2 = scanner.nextInt();
-
-                                // ================ Send Message =========================== //
-                                if (choiceOfActionP2 == 1) {
-                                    // user input for message
-                                    System.out.println("What would you like to send");
-                                    scanner.nextLine();
-                                    String messageToSend = scanner.nextLine();
-
-                                    // goes through each available customer
-                                    A : for (Customer customer: seller.getListOfCustomers()) {
-                                        // finds the correct customer that user wants to message
-                                        if (customer.getUserName().equals(choiceOfCustomer)) {
-                                            // goes through the arraylist of arraylists
-                                            for (int i = 0; i < seller.messages.size(); i++) {
-                                                // finds the arraylist of messages which the first index matches the correct customers name
-                                                // assumes that there is already a text history between the users
-                                                if (seller.messages.get(i).get(0).equals(customer.getUserName())) {
-                                                    System.out.println("Second Round");
-                                                    // adds the message into the array that has there text history already
-                                                    seller.messages.get(i).add(seller.getName() + ": " + messageToSend);
-                                                    // visual display on terminal (testing purposes)
-                                                    System.out.println(seller.messages);
-                                                    break A;
-                                                }
-                                                // if seller does not have text history and its we went through whole loop, create new message history with text and store it within the messages
-                                                if (!seller.hasContact && i == seller.messages.size() - 1 ) {
-                                                    System.out.println("first round!");
-                                                    // where we store the written text
-                                                    ArrayList<String> message = new ArrayList<>();
-                                                    // first slot is the name of the recipient (sorting / finding purposes)
-                                                    message.add(customer.getUserName());
-                                                    message.add(seller.getName() + ": " + messageToSend);
-                                                    // stores the string arraylist of text into an array list that stores  multiple arraylists of text (keeps history from each seller the user messgaes)
-                                                    seller.messages.add(message);
-                                                    // now seller has contact, no need to go through this initial condition
-                                                    seller.setHasContact(true);
-                                                    System.out.println(seller.messages);
-                                                    break A;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // sets it to false after sending message in case customer messages a new seller.
-                                    seller.setHasContact(false);
-                                    // ================ Send Message =========================== //
-
-                                    // ================ Edit Message =========================== //
-                                } else if (choiceOfActionP2 == 2) {
-                                    // user input for message to edit
-                                    System.out.println("Which message would you like to edit from this customer?");
-                                    scanner.nextLine();
-                                    String messageToEdit = scanner.nextLine();
-
-                                    // goes through each customer
-                                    for (Customer customer: seller.getListOfCustomers()) {
-                                        // finds correct customer that user wants to message
-                                        if (customer.getUserName().equals(choiceOfCustomer)) {
-                                            // goes through each arraylist in the arraylist of arraylists
-                                            for (int i = 0; i < seller.messages.size(); i++) {
-                                                // finds the arraylist of messages which the first index matches the correct customer's name
-                                                if (seller.messages.get(i).get(0).equals(customer.getUserName())) {
-                                                    // loops through each text that was sent
-                                                    for (int j = 1; j < seller.messages.get(i).size(); j++) {
-                                                        // if target text was found, prompts user to type in replacement message
-                                                        if (seller.messages.get(i).get(j).equals(seller.getName() + ": " + messageToEdit)) {
-                                                            System.out.println("What would you like to change it too?");
-                                                            String newMessage = scanner.nextLine();
-                                                            // replaces the old String message with new one
-                                                            seller.messages.get(i).set(seller.messages.get(i).indexOf(seller.getName() + ": " + messageToEdit),seller.getName() + ": "+ newMessage );
-                                                            System.out.println("Edit Successfully");
-                                                            // display the message data (test)
-                                                            System.out.println(seller.messages.get(i));
-                                                            // if no message is found and it comes to end of loop, display invalid message and breaks out of loop.
-                                                        } else if (!(seller.messages.get(i).get(j).equals(seller.getName() + ": " + messageToEdit)) && j == seller.messages.get(i).size() - 1) {
-                                                            System.out.println("Unable to find message");
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // ================ Edit Message =========================== //
-
-                                    // ================ Delete Message =========================== //
-                                } else if (choiceOfActionP2 == 3) {
-                                    System.out.println("Which message would you like to delete from this customer?");
-                                    scanner.nextLine();
-                                    String messageToDelete = scanner.nextLine();
-
-                                    // goes through each customer
-                                    for (Customer customer: seller.getListOfCustomers()) {
-                                        // finds correct customer that user wants to message
-                                        if (seller.getName().equals(choiceOfCustomer)) {
-                                            // goes through each arraylist in the arraylist of arraylists
-                                            for (int i = 0; i < seller.messages.size(); i++) {
-                                                // finds the arraylist of messages which the first index matches the correct customer's name
-                                                if (seller.messages.get(i).get(0).equals(customer.getUserName())) {
-                                                    // loops through each text that was sent
-                                                    for (int j = 1; j < seller.messages.get(i).size(); j++) {
-                                                        // if target text was found, removes that string from the specific arraylist of data
-                                                        if (seller.messages.get(i).get(j).equals(seller.getName() + ": "+ messageToDelete)) {
-                                                            seller.messages.get(i).remove(seller.getName() + ": "+ messageToDelete);
-                                                            System.out.println("Delete Successfully");
-
-                                                            System.out.println(seller.messages.get(i));
-
-                                                            // if no message is found and it comes to end of loop, display invalid message and breaks out of loop.
-                                                        } else if (!(seller.messages.get(i).get(j).equals(seller.getName() + ": "+ messageToDelete)) && j == seller.messages.get(i).size() - 1){
-                                                            System.out.println("Unable to find message");
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                // ================ Delete Message =========================== //
-
-                            }
-                        }
-                    }
-                    // resets choice of action so it loops properly again
-                    choiceOfAction = -1;
-
-
-                }
-                if (newAccount.equalsIgnoreCase("Y")) {
-
+            } while (breakOut != 2 && breakOut != 1);
+            if (breakOut == 2)
+                break;
+            else {
+                int userChoice;
+                do {
+                    System.out.println("Are you a customer or seller? \n1. Customer\n2. Seller");
+                    userChoice = scanner.nextInt();
+                    scanner.nextLine();
+                } while (userChoice != 2 && userChoice != 1);
+                if (userChoice == 1)
+                    handleCustomer(scanner);
+                else
+                    handleSeller(scanner);
+                if (currentUser == null) {
+                    System.out.println("Error! Run the program again to try again!");
+                    break;
                 }
             }
         }
+    }
+
+    /*
+        Handles the customer side of the program by calling login checks/makes new accounts, handles messaging features
+        as well.
+     */
+    public void handleCustomer(Scanner scanner) {
+        int newAcc;
+        boolean login;
+        String sendMessageTo;
+        do {
+            System.out.println("Do you already have an account? \n1. Yes\n2. No");
+            newAcc = scanner.nextInt();
+            scanner.nextLine();
+        } while (newAcc != 2 && newAcc != 1);
+        if (newAcc == 2) {
+            makeNewCustomer(scanner);
+        }
+        if (newAcc == 1) {
+            login = loginCustomer(scanner);
+            if (login == false) {
+                System.out.println("Wrong login!");
+                currentUser = null;
+                return;
+            }
+        }
+
+        int userChoice = 1;
+        while (userChoice == 1) {
+            ArrayList<Seller> unmessagedSellers = new ArrayList<Seller>();
+            do {
+                System.out.println("Please enter your choice of action:");
+                System.out.println("1. Message sellers");
+                System.out.println("2. Log out ");
+                userChoice = scanner.nextInt();
+                scanner.nextLine();
+            } while (userChoice != 2 && userChoice != 1);
+            //Pulls up existing seller messages
+            if (userChoice == 1) { // if user picks to message, it will go through checks to decide how messaging is set
+                if (messages.size() != 0) { //checks if the account has prexisting messages
+                    System.out.println("Conversations with existing Sellers");
+                    Set<String> keys = messages.keySet();
+                    Iterator<String> i = keys.iterator();
+                    ArrayList<String> toSort1 = new ArrayList<>();
+
+                    while (i.hasNext()) {
+                        String name = i.next();
+                        int count = 0;
+                        String filename = currentUser + "&" + name + ".txt";
+
+                        String mostCommonWord = "";
+                        int maxCount = 0;
+                        FileInputStream fileInputStream = null;
+                        ArrayList<String> commonWords = new ArrayList<>();
+                        try {
+                            //Gets statistics for number of messages the customer sent and most frequent word in the conversation
+                            fileInputStream = new FileInputStream(filename);
+                            BufferedReader bfr1 = new BufferedReader(new InputStreamReader(fileInputStream));
+                            bfr1.readLine();
+                            String line = bfr1.readLine();
+                            while (line != null) {
+                                String senderName = line.substring(line.indexOf(",") + 1, line.indexOf(": "));
+                                String contents = line.substring(line.indexOf(": ") + 2);
+                                String words[] = contents.toLowerCase().split("\\s+");
+                                for (String word: words) {
+                                    int freqCount = freqWordCount(word, filename);
+                                    if (freqCount > maxCount) {
+                                        commonWords.clear();
+                                        commonWords.add(word);
+                                        maxCount = freqCount;
+                                    } else if (freqCount == maxCount && !commonWords.contains(word)) {
+                                        commonWords.add(word);
+                                    }
+                                }
+                                if (senderName.equals(name)) {
+                                    count++;
+                                }
+                                line = bfr1.readLine();
+                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                        String com = "";
+                        for (int k = 0; k < commonWords.size(); k++) {
+                            com += commonWords.get(k);
+                            if (k < commonWords.size() - 1) {
+                                com += ", ";
+                            }
+                        }
+
+                        String existingInfo = (count + "$Seller: " + name + " - Store: " + findSellerStore(name) +" - Stats: Seller sent " + count + " messages total, Most frequent word/words in conversation: " + com);
+                        toSort1.add(existingInfo);
+                    }
+                    ArrayList<String> sortedList = new ArrayList<>();
+                    for (int ind = 0; ind < toSort1.size(); ind++) {
+                        System.out.println(toSort1.get(ind).substring(toSort1.get(ind).indexOf("$") + 1));
+                    }
+                    //Asks user if they would like to sort the messages by number of messages received
+                    System.out.println("Would you like to sort existing customer messages by number of messages received?");
+                    System.out.println("1. Yes");
+                    System.out.println("2. No");
+                    String cont = scanner.nextLine();
+                    if (cont.equals("1")) {
+                        Collections.sort(toSort1, new Comparator<String>() {
+                            public int compare(String str1, String str2) {
+                                int num1 = Integer.parseInt(str1.split("\\$")[0]);
+                                int num2 = Integer.parseInt(str2.split("\\$")[0]);
+                                return num1 - num2;
+                            }
+                        });
+                        for (int p = 0; p < toSort1.size(); p++) {
+                            System.out.println(toSort1.get(p).substring(toSort1.get(p).indexOf("$") + 1));
+                        }
+                    }
+
+                    //Ask if they want to message prexisting people or add new person to message.
+
+                    do {
+                        System.out.println("Type name of Seller to open chat.");
+                        System.out.println("Or start new conversation Type \"new\" ");
+                        sendMessageTo = scanner.nextLine();
+                    } while (messages.get(sendMessageTo) == null && !sendMessageTo.equalsIgnoreCase("new"));
+
+                    // Send message to new person despite having pre existing messages
+                    if (sendMessageTo.equalsIgnoreCase("new")) {
+                        ArrayList<String> sellerNames = new ArrayList<String>();
+                        for (int x = 0; x < sellers.size(); x++) {
+                            if (messages.get(sellers.get(x).getUsername()) == null) {
+                                unmessagedSellers.add(sellers.get(x));
+                                sellerNames.add(sellers.get(x).getUsername());
+                            }
+                        }
+                        if (unmessagedSellers.size() == 0) {
+                            System.out.println("Error: No new sellers to be messaged! Try again later!");
+                            currentUser = null;
+                            return;
+                        }
+                        for (int x = 0; x < unmessagedSellers.size(); x++)
+                            System.out.println("Seller: " + unmessagedSellers.get(x).getUsername() + " Store: "
+                                    + unmessagedSellers.get(x).getStoreName());
+                        do {
+                            System.out.println("Type name of Seller to open chat.");
+                            sendMessageTo = scanner.nextLine();
+                        } while (sellerNames.indexOf(sendMessageTo) < 0);
+                        System.out.println("Enter the message you would like to send.");
+                        String send = scanner.nextLine();
+                        System.out.println("Sent!");
+                        DateTimeFormatter globalFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                        ZonedDateTime currentISTime = ZonedDateTime.now();
+                        ZonedDateTime currentETime =
+                                currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                        String timeStamp = globalFormat.format(currentETime);
+                        String line = timeStamp + "," + currentUser + ": " + send;
+                        ArrayList<String> output = new ArrayList<String>();
+                        output.add(line);
+                        unmessagedSellers.remove(sendMessageTo);
+                        messages.put(sendMessageTo, output);
+                        writeConversation("Seller", sendMessageTo);
+
+                    } else { // this is the option that allows them to send messeges in preexisting conversations
+                        ArrayList<String> conversation = messages.get(sendMessageTo);
+                        for (int x = 0; x < conversation.size(); x++)
+                            System.out.println(conversation.get(x));
+                        int sendMessage;
+                        do {
+                            System.out.println("What would you like to do? \n1. Send message" +
+                                    "\n2. Edit message\n3. Delete message\n4. Export conversation to CSV\n5. View Statistics Dashboard\n5. Exit");
+                            sendMessage = scanner.nextInt();
+                            scanner.nextLine();
+                        } while (sendMessage != 1 && sendMessage != 2 && sendMessage != 3 && sendMessage != 4 &&
+                                sendMessage != 5 && sendMessage !=6);
+                        if (sendMessage == 1) {
+                            System.out.println("Enter the message you would like to send.");
+                            String send = scanner.nextLine();
+                            DateTimeFormatter globalFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                            ZonedDateTime currentISTime = ZonedDateTime.now();
+                            ZonedDateTime currentETime =
+                                    currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                            String timeStamp = globalFormat.format(currentETime);
+                            String line = timeStamp + "," + currentUser + ": " + send;
+                            messages.get(sendMessageTo).add(line); // adds the new line into the value of the hashmap
+                            System.out.println("Sent!");
+                            writeConversation("Seller", sendMessageTo);
+                        } else if (sendMessage == 2) {
+                            String lineToChange;
+                            int lineIndex = 0;
+                            boolean lineFound = false;
+                            do {
+                                System.out.println("Type out which message you would like to edit:");
+                                lineToChange = scanner.nextLine();
+                                for (int x = 0; x < messages.get(sendMessageTo).size(); x++) {
+                                    if (messages.get(sendMessageTo).get(x).contains(lineToChange)) {
+                                        lineFound = true;
+                                        lineIndex = x;
+                                    }
+                                }
+                                if (!lineFound)
+                                    System.out.println("Error! Type the correct line that you would like to edit!");
+                            } while (!lineFound);
+                            System.out.println("Type out what you would like the message to be edited to:");
+                            String desiredLine = scanner.nextLine();
+                            messages.get(sendMessageTo).set(lineIndex,
+                                    messages.get(sendMessageTo).get(lineIndex).replace(lineToChange, desiredLine));
+                            writeConversation("Seller", sendMessageTo);
+                            System.out.println("Message has been edited!");
+                        } else if (sendMessage == 3) {
+                            String lineToChange;
+                            boolean lineFound = false;
+                            do {
+                                System.out.println("Type out which message you would like to delete:");
+                                lineToChange = scanner.nextLine();
+                                for (int x = 0; x < messages.get(sendMessageTo).size(); x++) {
+                                    if (messages.get(sendMessageTo).get(x).contains(lineToChange)) {
+                                        lineFound = true;
+                                        messages.get(sendMessageTo).remove(x);
+                                    }
+                                }
+                                if (!lineFound)
+                                    System.out.println("Error! Type the correct line that you would like to delete!");
+                            } while (!lineFound);
+                            writeConversation("Seller", sendMessageTo);
+                            System.out.println("Message has been deleted!");
+                        } else if (sendMessage == 4) {
+                            //get filename of conversation and run export to CVS, should run for all cases
+                            String conversationFile = conversation.get(0).substring(conversation.get(0).indexOf(":") +
+                                    2);
+                            csvExport(conversationFile);
+                        } else if (sendMessage == 5) {
+                            System.out.println("hi");
+                        }
+                    }
+                } else {    //this is for  entirely new accounts to send messages.
+                    ArrayList<String> sellerNames = new ArrayList<String>();
+                    if (sellers.size() == 0) {
+                        System.out.println("Error: No new sellers to be messaged! Try again later!");
+                        currentUser = null;
+                        return;
+                    }
+                    for (int x = 0; x < sellers.size(); x++) {
+                        System.out.println(sellers.get(x).getUsername() + ", Store: "
+                                + sellers.get(x).getStoreName());
+                        sellerNames.add(sellers.get(x).getUsername());
+                    }
+                    do {
+                        System.out.println("Type name of Seller to open a new chat.");
+                        sendMessageTo = scanner.nextLine();
+                    } while (sellerNames.indexOf(sendMessageTo) < 0);
+                    System.out.println("Enter the message you would like to send.");
+                    String send = scanner.nextLine();
+                    System.out.println("Sent!");
+                    DateTimeFormatter globalFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                    ZonedDateTime currentISTime = ZonedDateTime.now();
+                    ZonedDateTime currentETime =
+                            currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                    String timeStamp = globalFormat.format(currentETime);
+                    String line = timeStamp + "," + currentUser + ": " + send;
+                    ArrayList<String> output = new ArrayList<String>();
+                    output.add(line);
+                    unmessagedSellers.remove(sendMessageTo);
+                    messages.put(sendMessageTo, output); // saves the conversation with assigned user
+                    writeConversation("Seller", sendMessageTo); // writes the conversation into the file
+                }
+
+            } else { // saves the new people talked to into the updateinfo.txt file.
+                if (messages.size() > 0) {
+                    Set<String> keys = messages.keySet();
+                    Iterator<String> i = keys.iterator();
+                    String[] messagesWith = new String[messages.size()];
+                    for (int x = 0; x < messages.size(); x++)
+                        messagesWith[x] = i.next();
+                    customer.setMessagedSellers(messagesWith);
+                }
+                customer.updateInfo();
+            }
+        }
+    }
+
+    /*
+        To be implemented but it handles the seller side of things with similar implementation as the customer method.
+     */
+    public void handleSeller(Scanner scanner) {
+
+        int newAcc;
+        boolean login;
+        String sendMessageTo;
+        do {
+            System.out.println("Do you already have an account? \n1. Yes\n2. No");
+            newAcc = scanner.nextInt();
+            scanner.nextLine();
+        } while (newAcc != 2 && newAcc != 1);
+        if (newAcc == 2) {
+            makeNewSeller(scanner);
+        }
+        if (newAcc == 1) {
+            login = loginSeller(scanner);
+            if (login == false) {
+                System.out.println("Wrong login!");
+                currentUser = null;
+                return;
+            }
+        }
+        int userChoice = 1;
+        while (userChoice == 1) {
+            ArrayList<Customer> unmessagedCustomers = new ArrayList<Customer>();
+            do {
+                System.out.println("Please enter your choice of action:");
+                System.out.println("1. Message customers");
+                System.out.println("2. Log out ");
+                userChoice = scanner.nextInt();
+                scanner.nextLine();
+            } while (userChoice != 2 && userChoice != 1);
+            //Pulls up existing seller messages
+            if (userChoice == 1) { // if user picks to message, it will go through checks to decide how messaging is set
+                if (messages.size() != 0) { //checks if the account has prexisting messages
+                    System.out.println("Conversations with existing customers");
+                    Set<String> keys = messages.keySet();
+                    Iterator<String> i = keys.iterator();
+                    ArrayList<String> toSort = new ArrayList<>();
+                    while (i.hasNext()) {
+                        String name = i.next();
+                        int count = 0;
+                        String filename = name + "&" + currentUser + ".txt";
+
+                        String mostCommonWord = "";
+                        int maxCount = 0;
+                        FileInputStream fileInputStream = null;
+                        ArrayList<String> commonWords = new ArrayList<>();
+                        try {
+                            //Gets statistics for number of messages the customer sent and most frequent word in the conversation
+                            fileInputStream = new FileInputStream(filename);
+                            BufferedReader bfr = new BufferedReader(new InputStreamReader(fileInputStream));
+                            bfr.readLine();
+                            String line = bfr.readLine();
+                            while (line != null) {
+                                String senderName = line.substring(line.indexOf(",") + 1, line.indexOf(": "));
+                                String contents = line.substring(line.indexOf(": ") + 2);
+                                String words[] = contents.toLowerCase().split("\\s+");
+                                for (String word: words) {
+                                    int freqCount = freqWordCount(word, filename);
+                                    if (freqCount > maxCount) {
+                                        commonWords.clear();
+                                        commonWords.add(word);
+                                        maxCount = freqCount;
+                                    } else if (freqCount == maxCount && !commonWords.contains(word)) {
+                                        commonWords.add(word);
+                                    }
+                                }
+                                if (senderName.equals(name)) {
+                                    count++;
+                                }
+                                line = bfr.readLine();
+                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                        String com = "";
+                        for (int k = 0; k < commonWords.size(); k++) {
+                            com += commonWords.get(k);
+                            if (k < commonWords.size() - 1) {
+                                com += ", ";
+                            }
+                        }
+
+                        String existingInfo = (count + "$Customer: " + name + " - Stats: Customer sent " + count + " messages total, Most frequent word/words in conversation: " + com);
+                        toSort.add(existingInfo);
+                    }
+                    ArrayList<String> sortedList = new ArrayList<>();
+                    for (int ind = 0; ind < toSort.size(); ind++) {
+                        System.out.println(toSort.get(ind).substring(toSort.get(ind).indexOf("$") + 1));
+                    }
+                    //Asks user if they would like to sort the messages by number of messages received
+
+                    System.out.println("Would you like to sort existing customer messages by number of messages received?");
+                    System.out.println("1. Yes");
+                    System.out.println("2. No");
+                    String cont = scanner.nextLine();
+                    if (cont.equals("1")) {
+                        Collections.sort(toSort, new Comparator<String>() {
+                            public int compare(String str1, String str2) {
+                                int num1 = Integer.parseInt(str1.split("\\$")[0]);
+                                int num2 = Integer.parseInt(str2.split("\\$")[0]);
+                                return num1 - num2;
+                            }
+                        });
+                        for (int p = 0; p < toSort.size(); p++) {
+                            System.out.println(toSort.get(p).substring(toSort.get(p).indexOf("$") + 1));
+                        }
+                    }
+
+                    //Ask if they want to message prexisting people or add new person to message.
+
+                    do {
+                        System.out.println("Type name of Customer to open chat.");
+                        System.out.println("Or start new conversation Type \"new\" ");
+                        sendMessageTo = scanner.nextLine();
+                    } while (messages.get(sendMessageTo) == null && !sendMessageTo.equalsIgnoreCase("new"));
+
+                    // Send message to new person despite having pre existing messages
+                    if (sendMessageTo.equalsIgnoreCase("new")) {
+                        ArrayList<String> customerNames = new ArrayList<String>();
+                        for (int x = 0; x < customers.size(); x++) {
+                            if (messages.get(customers.get(x).getUsername()) == null) {
+                                unmessagedCustomers.add(customers.get(x));
+                                customerNames.add(customers.get(x).getUsername());
+                            }
+                        }
+                        if (unmessagedCustomers.size() == 0) {
+                            System.out.println("Error: No new customers to be messaged! Try again later!");
+                            currentUser = null;
+                            return;
+                        }
+                        for (int x = 0; x < unmessagedCustomers.size(); x++)
+                            System.out.println("Customer: " + unmessagedCustomers.get(x).getUsername());
+                        do {
+                            System.out.println("Type name of Customer to open chat.");
+                            sendMessageTo = scanner.nextLine();
+                        } while (customerNames.indexOf(sendMessageTo) < 0);
+                        System.out.println("Enter the message you would like to send.");
+                        String send = scanner.nextLine();
+                        System.out.println("Sent!");
+                        DateTimeFormatter globalFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                        ZonedDateTime currentISTime = ZonedDateTime.now();
+                        ZonedDateTime currentETime =
+                                currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                        String timeStamp = globalFormat.format(currentETime);
+                        String line = timeStamp + "," + currentUser + ": " + send;
+                        ArrayList<String> output = new ArrayList<String>();
+                        output.add(line);
+                        unmessagedCustomers.remove(sendMessageTo);
+                        messages.put(sendMessageTo, output);
+                        writeConversation("Customer", sendMessageTo);
+
+                    } else { // this is the option that allows them to send messeges in preexisting conversations
+                        ArrayList<String> conversation = messages.get(sendMessageTo);
+                        for (int x = 0; x < conversation.size(); x++)
+                            System.out.println(conversation.get(x));
+                        int sendMessage;
+                        do {
+                            System.out.println("What would you like to do? \n1. Send message" +
+                                    "\n2. Edit message\n3. Delete message\n4. Export conversation to CSV\n5. Exit");
+                            sendMessage = scanner.nextInt();
+                            scanner.nextLine();
+                        } while (sendMessage != 1 && sendMessage != 2 && sendMessage != 3 && sendMessage != 4 &&
+                                sendMessage != 5);
+                        if (sendMessage == 1) {
+                            System.out.println("Enter the message you would like to send.");
+                            String send = scanner.nextLine();
+                            DateTimeFormatter globalFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                            ZonedDateTime currentISTime = ZonedDateTime.now();
+                            ZonedDateTime currentETime =
+                                    currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                            String timeStamp = globalFormat.format(currentETime);
+                            String line = timeStamp + "," + currentUser + ": " + send;
+                            messages.get(sendMessageTo).add(line); // adds the new line into the value of the hashmap
+                            System.out.println("Sent!");
+                            writeConversation("Customer", sendMessageTo);
+                        } else if (sendMessage == 2) {
+                            String lineToChange;
+                            int lineIndex = 0;
+                            boolean lineFound = false;
+                            do {
+                                System.out.println("Type out which message you would like to edit:");
+                                lineToChange = scanner.nextLine();
+                                for (int x = 0; x < messages.get(sendMessageTo).size(); x++) {
+                                    if (messages.get(sendMessageTo).get(x).contains(lineToChange)) {
+                                        lineFound = true;
+                                        lineIndex = x;
+                                    }
+                                }
+                                if (!lineFound)
+                                    System.out.println("Error! Type the correct line that you would like to edit!");
+                            } while (!lineFound);
+                            System.out.println("Type out what you would like the message to be edited to:");
+                            String desiredLine = scanner.nextLine();
+                            messages.get(sendMessageTo).set(lineIndex,
+                                    messages.get(sendMessageTo).get(lineIndex).replace(lineToChange, desiredLine));
+                            writeConversation("Customer", sendMessageTo);
+                            System.out.println("Message has been edited!");
+                        } else if (sendMessage == 3) {
+                            String lineToChange;
+                            boolean lineFound = false;
+                            do {
+                                System.out.println("Type out which message you would like to delete:");
+                                lineToChange = scanner.nextLine();
+                                for (int x = 0; x < messages.get(sendMessageTo).size(); x++) {
+                                    if (messages.get(sendMessageTo).get(x).contains(lineToChange)) {
+                                        lineFound = true;
+                                        messages.get(sendMessageTo).remove(x);
+                                    }
+                                }
+                                if (!lineFound)
+                                    System.out.println("Error! Type the correct line that you would like to delete!");
+                            } while (!lineFound);
+                            writeConversation("Customer", sendMessageTo);
+                            System.out.println("Message has been deleted!");
+                        } else if (sendMessage == 4) {
+                            //get filename of conversation and run export to CVS, should run for all cases
+                            String conversationFile = conversation.get(0).substring(conversation.get(0).indexOf(":") +
+                                    2);
+                            csvExport(conversationFile);
+                        }
+                    }
+                } else {    //this is for  entirely new accounts to send messages.
+                    ArrayList<String> customerNames = new ArrayList<String>();
+                    if (customers.size() == 0) {
+                        System.out.println("Error: No new customers to be messaged! Try again later!");
+                        currentUser = null;
+                        return;
+                    }
+                    for (int x = 0; x < customers.size(); x++) {
+                        System.out.println("Customer: " + customers.get(x).getUsername());
+                        customerNames.add(customers.get(x).getUsername());
+                    }
+                    do {
+                        System.out.println("Type name of Customer to open a new chat.");
+                        sendMessageTo = scanner.nextLine();
+                    } while (customerNames.indexOf(sendMessageTo) < 0);
+                    System.out.println("Enter the message you would like to send.");
+                    String send = scanner.nextLine();
+                    System.out.println("Sent!");
+                    DateTimeFormatter globalFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mma z");
+                    ZonedDateTime currentISTime = ZonedDateTime.now();
+                    ZonedDateTime currentETime =
+                            currentISTime.withZoneSameInstant(ZoneId.of("America/New_York"));
+                    String timeStamp = globalFormat.format(currentETime);
+                    String line = timeStamp + "," + currentUser + ": " + send;
+                    ArrayList<String> output = new ArrayList<String>();
+                    output.add(line);
+                    unmessagedCustomers.remove(sendMessageTo);
+                    messages.put(sendMessageTo, output); // saves the conversation with assigned user
+                    writeConversation("Customer", sendMessageTo); // writes the conversation into the file
+                }
+
+            } else { // saves the new people talked to into the updateinfo.txt file.
+                if (messages.size() > 0) {
+                    Set<String> keys = messages.keySet();
+                    Iterator<String> i = keys.iterator();
+                    String[] messagesWith = new String[messages.size()];
+                    for (int x = 0; x < messages.size(); x++)
+                        messagesWith[x] = i.next();
+                    seller.setMessagedCustomers(messagesWith);
+                }
+                seller.updateInfo();
+            }
+        }
+    }
+
+    /*
+        Makes new Customer
+     */
+    public void makeNewCustomer(Scanner scanner) {
+        System.out.println("Please enter a username: ");
+        currentUser = scanner.nextLine();
+        System.out.println("Please enter a password: ");
+        String password = scanner.nextLine();
+        readUsers("Seller");
+        for (int i = 0; i < customers.size(); i++) {
+            if (customers.get(i).getUsername() == currentUser) {
+                System.out.println("Username taken!");
+                currentUser = null;
+                return;
+            }
+        }
+        customer = new Customer(currentUser, password);
+    }
+
+    /*
+        Makes new seller
+     */
+    public void makeNewSeller(Scanner scanner) {
+        System.out.println("Please enter a username: ");
+        currentUser = scanner.nextLine();
+        System.out.println("Please enter a password: ");
+        String password = scanner.nextLine();
+        System.out.println("Please enter a store name: ");
+        String storeName = scanner.nextLine();
+        readUsers("Customer");
+        for (int i = 0; i < sellers.size(); i++) {
+            if (sellers.get(i).getUsername() == currentUser) {
+                System.out.println("Username taken!");
+                currentUser = null;
+                return;
+            }
+        }
+        seller = new Seller(currentUser, password, storeName);
+    }
+
+    /*
+        Checks login for new customer
+     */
+    public boolean loginCustomer(Scanner scanner) {
+        boolean loggedIn = false;
+        System.out.println("Please enter your username: ");
+        String username = scanner.nextLine();
+        System.out.println("Please enter your password: ");
+        String password = scanner.nextLine();
+        currentUser = username;
+        readUsers("Seller");
+        for (int i = 0; i < customers.size(); i++) {
+            String user = customers.get(i).getUsername();
+            String pass = customers.get(i).getPassword();
+            if (username.equals(user) && pass.equals(password)) {
+                loggedIn = true;
+                customer = new Customer(currentUser, password);
+                break;
+            }
+        }
+        return loggedIn;
+    }
+
+    public boolean loginSeller(Scanner scanner) {
+        boolean loggedIn = false;
+        System.out.println("Please enter your username: ");
+        String username = scanner.nextLine();
+        System.out.println("Please enter your password: ");
+        String password = scanner.nextLine();
+        currentUser = username;
+        readUsers("Customer");
+        for (int i = 0; i < sellers.size(); i++) {
+            String user = sellers.get(i).getUsername();
+            String pass = sellers.get(i).getPassword();
+            String store = sellers.get(i).getStoreName();
+            if (username.equals(user) && pass.equals(password)) {
+                loggedIn = true;
+                seller = new Seller(currentUser, password, store);
+                break;
+            }
+        }
+        return loggedIn;
+    }
+
+    /*
+        Finds the sellers store based on the sellers name
+     */
+    public String findSellerStore(String name) {
+        for (int i = 0; i < sellers.size(); i++)
+            if (sellers.get(i).getUsername().equals(name))
+                return sellers.get(i).getStoreName();
+        return "";
+    }
+
+    /*
+        Reads all the existing users from the info file in order to check that they exist + calls method to
+         import conversations
+     */
+    public void readUsers(String keyUser) {
+        File f = new File("UserInfo.txt");
+        try {
+            FileReader fr = new FileReader(f);
+            BufferedReader bfr = new BufferedReader(fr);
+            while (true) {
+
+                String line = bfr.readLine(); // reads first line to check if the person is customer or seller
+                if (line == null)
+                    break;
+                String messageList = bfr.readLine();
+                String[] userMessages;
+                if (messageList.equalsIgnoreCase("null"))
+                    userMessages = null;
+                else userMessages = messageList.split(",");
+                String[] userInfo = line.split(","); // splits the line to read type of user
+
+                if (userInfo[2].equals("Seller"))
+                    sellers.add(new Seller(userInfo[0], userInfo[1], userInfo[3], userMessages));
+                else
+                    customers.add(new Customer(userInfo[0], userInfo[1], userMessages));
+
+                if (userInfo[2].equalsIgnoreCase(keyUser)) {
+                    if (messageList.contains(currentUser)) {
+                        readCoversation(keyUser, userInfo[0]);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+        Imports the existing conversation with the other user and stores it as a hashmap for printing later/saving
+        and modifying
+     */
+    public void readCoversation(String keyUser, String otherUser) {
+        ArrayList<String> conversation = new ArrayList<String>();
+        String conversationFile = "";
+        if (keyUser.equalsIgnoreCase("Seller"))
+            conversationFile = currentUser + "&" + otherUser + ".txt";
+        else
+            conversationFile = otherUser + "&" + currentUser + ".txt";
+        File f = new File(conversationFile);
+        try {
+            FileReader fr = new FileReader(f);
+            BufferedReader bfr = new BufferedReader(fr);
+            while (true) {
+                String line = bfr.readLine();
+                if (line == null)
+                    break;
+                conversation.add(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        messages.put(otherUser, conversation);
+    }
+
+    /*
+        Creates new file for new conversation.
+     */
+    public void writeConversation(String keyUser, String otherUser) {
+        String fileName;
+        if (keyUser.equals("Seller"))
+            fileName = currentUser + "&" + otherUser + ".txt";
+        else
+            fileName = otherUser + "&" + currentUser + ".txt";
+        File f = new File(fileName);
+        try {
+            FileOutputStream fos = new FileOutputStream(f);
+            PrintWriter pw = new PrintWriter(fos);
+            if (!messages.get(otherUser).get(0).contains("&Seller"))
+                pw.println("Participants (Customer&Seller) : " + fileName);
+            for (int i = 0; i < messages.get(otherUser).size(); i++)
+                pw.println(messages.get(otherUser).get(i));
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // export to CVS method, should work for both user and seller
+    public void csvExport(String conversationTextFile) {
+        try {
+            String participants = conversationTextFile.substring(0, conversationTextFile.length() - 4);
+
+
+            BufferedReader bfr = new BufferedReader(new FileReader(conversationTextFile));
+            File filecsv = new File(participants + ".csv");
+            BufferedWriter bfw = new BufferedWriter(new FileWriter(filecsv));
+
+            //Reading twice here because we have to skip first line of the conversation
+            String line = bfr.readLine();
+            line = bfr.readLine();
+            bfw.write("Customer&Seller,Timestamp,Sender,Contents\n");
+            while (line != null) {
+                //Constants used to build CSV line, array used specifically to get timestamp
+                String[] lineArr = line.split(" ");
+                String content = line.substring(line.indexOf(":", 20) + 2);
+                String sender = lineArr[3].substring(lineArr[3].indexOf(",") + 1, lineArr[3].indexOf(":"));
+
+                //Final string that is going to be written to CSV file
+                String temp = String.format("%s,%s,%s,\"%s\"\n", participants, lineArr[2], sender, content);
+                bfw.write(temp);
+
+                line = bfr.readLine();
+            }
+
+            //If everything worked succesfully close reader and writer objects and print to terminal.
+            bfw.close();
+            bfr.close();
+            System.out.println("Conversation succesfully exported!");
+
+        } catch (IOException e) {
+            System.out.println("Error reading file!");
+            e.printStackTrace();
+        }
+    }
+    // Counts frequency of words in a file *used for stats
+    public int freqWordCount(String word, String fileName) throws Exception {
+        int count = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] words = line.toLowerCase().split("\\s+");
+                for (String w : words) {
+                    if (w.equals(word)) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
     }
 }
