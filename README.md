@@ -12,7 +12,7 @@ customer when login in / creating account. (1 = Customer | 2 = Seller)
 3. Program asks the user whether they want to log in or create a new account:
    1. If no account is found for given username and password combination tells user no account was found and quits.
    2. If a match is found for given username, password and account type user is loged in and allowed to use message interface.
-4. User can choose to message a seller or a customer (depending on their account type) or log out.
+4. User can choose to message a seller or a customer (depending on their account type) or block a user or log out.
 5. If user decides to message and have no previous conversations they can choose which account to message by typing their username. If they have preexisting conversations they can either:
    1. Message an existing seller by typing their username.
    2. Message a new seller by typing 'new.'
