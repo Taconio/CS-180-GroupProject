@@ -21,7 +21,8 @@ customer when login in / creating account. (1 = Customer | 2 = Seller)
    2. Edit a previous message.
    3. Delete a previous message.
    4. Export their conversation as a CSV file of the format "Customer&Seller,Timestamp,Sender,Contents"
-   5. Exit message screen.
+   5. Import a txt file into the conversation to send as a message.
+   6. Exit message screen.
 7. After a user has completed their action program goes back to step 4 until they decide to log out.
 8. Program goes back to first step: 
    1. If User chooses yes program starts again from step 2
