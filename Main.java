@@ -18,9 +18,7 @@ public class Main {
     private ArrayList<String> oppositeUsers;
     private ArrayList<Customer> customers;
     private ArrayList<Seller> sellers;
-
     private ArrayList<Seller> blockedSellers;
-
     private ArrayList<Customer> blockedCustomers;
 
 
