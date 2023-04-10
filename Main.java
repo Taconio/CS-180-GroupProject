@@ -7,8 +7,8 @@ import java.util.Collections;
 /**
  * Runs our project for CS180 Spring 2023
  *
- * @author Group #
- * @date 04-08-2023
+ * @author Parth Thakre, Anthony Rodriguez, Will Greenwood, Marcelo Moreno, Ji Bing Ni
+ * @version 04-10-2023
  */
 public class Main {
     private String currentUser;
@@ -148,7 +148,9 @@ public class Main {
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                        String existingInfo = (count + "$" + countSelfMessages + "%Seller: " + name + " - Store: " + findSellerStore(name) +" - Stats: Seller sent " + count + " messages total, You sent " + countSelfMessages + " mesages total");
+                        String existingInfo = (count + "$" + countSelfMessages +
+                                "%Seller: " + name + " - Store: " + findSellerStore(name) +" - Stats: Seller sent "
+                                + count + " messages total, You sent " + countSelfMessages + " mesages total");
                         toSort1.add(existingInfo);
                         sortedList.add(existingInfo);
                     }
@@ -163,7 +165,7 @@ public class Main {
                         System.out.println("Choose next action:");
                         System.out.println("1. Sort by messages received");
                         System.out.println("2. Sort by messages sent");
-                        System.out.println("3. Continue");
+                        System.out.println("3. Continue to message sellers");
                         cont = scanner.nextLine();
                         if (cont.equals("1")) {
                             Collections.sort(toSort1, new Comparator<String>() {
@@ -244,11 +246,12 @@ public class Main {
                         int sendMessage;
                         do {
                             System.out.println("What would you like to do? \n1. Send message" +
-                                    "\n2. Edit message\n3. Delete message\n4. Export conversation to CSV\n5. View Statistics Dashboard\n5. Exit");
+                                    "\n2. Edit message\n3. Delete message" +
+                                    "\n4. Export conversation to CSV\n5. Exit");
                             sendMessage = scanner.nextInt();
                             scanner.nextLine();
                         } while (sendMessage != 1 && sendMessage != 2 && sendMessage != 3 && sendMessage != 4 &&
-                                sendMessage != 5 && sendMessage !=6);
+                                sendMessage != 5);
                         if (sendMessage == 1) {
                             System.out.println("Enter the message you would like to send.");
                             String send = scanner.nextLine();
@@ -305,8 +308,6 @@ public class Main {
                             String conversationFile = conversation.get(0).substring(conversation.get(0).indexOf(":") +
                                     2);
                             csvExport(conversationFile);
-                        } else if (sendMessage == 5) {
-                            System.out.println("hi");
                         }
                     }
                 } else {    //this is for  entirely new accounts to send messages.
@@ -441,7 +442,9 @@ public class Main {
                             }
                         }
 
-                        String existingInfo = (count + "$Customer: " + name + " - Stats: Customer sent " + count + " messages total, Most frequent word/words in conversation: " + com);
+                        String existingInfo = (count + "$Customer: " +
+                                name + " - Stats: Customer sent " + count
+                                + " messages total, Most frequent word/words in conversation: " + com);
                         toSort.add(existingInfo);
                     }
                     ArrayList<String> sortedList = new ArrayList<>();
@@ -628,11 +631,16 @@ public class Main {
     /*
         Makes new Customer
      */
+    /*
+        Makes new Customer
+     */
     public void makeNewCustomer(Scanner scanner) {
         System.out.println("Please enter a username: ");
         currentUser = scanner.nextLine();
         System.out.println("Please enter a password: ");
         String password = scanner.nextLine();
+        System.out.println("Please enter an email: ");
+        String email = scanner.nextLine();
         readUsers("Seller");
         for (int i = 0; i < customers.size(); i++) {
             if (customers.get(i).getUsername() == currentUser) {
@@ -641,7 +649,7 @@ public class Main {
                 return;
             }
         }
-        customer = new Customer(currentUser, password);
+        customer = new Customer(currentUser, password, email);
     }
 
     /*
@@ -652,6 +660,8 @@ public class Main {
         currentUser = scanner.nextLine();
         System.out.println("Please enter a password: ");
         String password = scanner.nextLine();
+        System.out.println("Please enter a mail: ");
+        String email = scanner.nextLine();
         System.out.println("Please enter a store name: ");
         String storeName = scanner.nextLine();
         readUsers("Customer");
@@ -662,7 +672,7 @@ public class Main {
                 return;
             }
         }
-        seller = new Seller(currentUser, password, storeName);
+        seller = new Seller(currentUser, password, email, storeName);
     }
 
     /*
@@ -679,9 +689,10 @@ public class Main {
         for (int i = 0; i < customers.size(); i++) {
             String user = customers.get(i).getUsername();
             String pass = customers.get(i).getPassword();
+            String mail = customers.get(i).getEmail();
             if (username.equals(user) && pass.equals(password)) {
                 loggedIn = true;
-                customer = new Customer(currentUser, password);
+                customer = new Customer(currentUser, password, mail);
                 break;
             }
         }
@@ -699,10 +710,11 @@ public class Main {
         for (int i = 0; i < sellers.size(); i++) {
             String user = sellers.get(i).getUsername();
             String pass = sellers.get(i).getPassword();
+            String mail = sellers.get(i).getEmail();
             String store = sellers.get(i).getStoreName();
             if (username.equals(user) && pass.equals(password)) {
                 loggedIn = true;
-                seller = new Seller(currentUser, password, store);
+                seller = new Seller(currentUser, password, mail, store);
                 break;
             }
         }
@@ -740,12 +752,12 @@ public class Main {
                 else userMessages = messageList.split(",");
                 String[] userInfo = line.split(","); // splits the line to read type of user
 
-                if (userInfo[2].equals("Seller"))
-                    sellers.add(new Seller(userInfo[0], userInfo[1], userInfo[3], userMessages));
+                if (userInfo[3].equals("Seller"))
+                    sellers.add(new Seller(userInfo[0], userInfo[1], userInfo[2], userInfo[4], userMessages));
                 else
-                    customers.add(new Customer(userInfo[0], userInfo[1], userMessages));
+                    customers.add(new Customer(userInfo[0], userInfo[1], userInfo[2], userMessages));
 
-                if (userInfo[2].equalsIgnoreCase(keyUser)) {
+                if (userInfo[3].equalsIgnoreCase(keyUser)) {
                     if (messageList.contains(currentUser)) {
                         readCoversation(keyUser, userInfo[0]);
                     }
