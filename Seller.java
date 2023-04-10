@@ -2,15 +2,16 @@ import java.util.*;
 import java.io.*;
 
 /**
- * Runs our project for CS180 Spring 2023
+ *  Seller Class for our CS group project
  *
- * @author Group #
- * @date 04-08-2023
+ * @author Parth Thakre, Anthony Rodriguez, Will Greenwood, Marcelo Moreno, Ji Bing Ni
+ * @version 04-10-2023
  */
 
 public class Seller {
     private String username;
     private String password;
+    private String email;
     private String storeName;
     private String[] messagedCustomers;
 
@@ -18,9 +19,10 @@ public class Seller {
         For new accounts
      */
 
-    public Seller(String username, String password, String storeName) {
+    public Seller(String username, String password, String email, String storeName) {
         this.username = username;
         this.password = password;
+        this.email = email;
         this.storeName = storeName;
         messagedCustomers = null;
     }
@@ -29,9 +31,10 @@ public class Seller {
         For prexisting accounts
      */
 
-    public Seller(String username, String password, String storeName, String[] messagedCustomers) {
+    public Seller(String username, String password, String email, String storeName, String[] messagedCustomers) {
         this.username = username;
         this.password = password;
+        this.email = email;
         this.messagedCustomers = messagedCustomers;
         this.storeName = storeName;
     }
@@ -46,6 +49,10 @@ public class Seller {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public void setPassword(String password) {
@@ -83,7 +90,7 @@ public class Seller {
                     break;
                 String messageList = bfr.readLine();
                 String[] userInfo = line.split(",");
-                if (messagedCustomers != null && userInfo[2].equals("Customer") && !messageList.contains(username)) {
+                if (messagedCustomers != null && userInfo[3].equals("Customer") && !messageList.contains(username)) {
                     for (int i = 0; i < messagedCustomers.length; i++) {
                         if (messagedCustomers[i].equals(userInfo[0])) {
                             if (messageList.equals("null"))
@@ -103,7 +110,7 @@ public class Seller {
         }
 
 
-        String userInfo = username + "," + password + "," + "Seller" + "," + storeName;
+        String userInfo = username + "," + password + "," + email + "," + "Seller" + "," + storeName;
         String messages = "";
         if (messagedCustomers == null)
             messages = "null";
