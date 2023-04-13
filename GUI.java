@@ -9,11 +9,13 @@ public class GUI {
     static int userChoice;
 
     boolean loggedIn = false;
+    static String cont;
+    static String sendMessageTo;
 
 
     public static void main(String[] args) {
         while (true) {
-            
+
             // welcomeDisplay
             JOptionPane.showMessageDialog(null, "Welcome to the messaging System", "Welcome",
                     JOptionPane.INFORMATION_MESSAGE);
@@ -121,5 +123,32 @@ public class GUI {
     public static void errorMessageDisplay() {
         JOptionPane.showInputDialog(null, "Error! Run the program again to try again!",
                 "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static void choiceOfActionDisplay() {
+        userChoice = Integer.parseInt(JOptionPane.showInputDialog(null, "Please enter your choice of action\n" +
+                        "1. Message sellers\n" +
+                        "2. Block customer/Unblock customer\n" +
+                        "3. Log out",
+                "choiceOfAction", JOptionPane.QUESTION_MESSAGE));
+
+    }
+    public static void choiceOfActionDisplayP2() {
+        cont = JOptionPane.showInputDialog(null, "Choose next action:\n" +
+                        "1. Sort by messages received\n" +
+                        "2. Sort by messages sent\n" +
+                        "3. Continue to message sellers",
+                "choiceOfActionP2", JOptionPane.QUESTION_MESSAGE);
+    }
+
+    public static void typeNameOfSellerDisplay() {
+        sendMessageTo = JOptionPane.showInputDialog(null, "Type name of Seller to open chat.\n" +
+                        "Or start new conversation Type \"new\" ",
+                "choiceOfActionP2", JOptionPane.QUESTION_MESSAGE);
+    }
+    public static void typeNameOfCustomerDisplay() {
+        sendMessageTo = JOptionPane.showInputDialog(null, "Type name of Customer to open chat.\n" +
+                        "Or start new conversation Type \"new\" ",
+                "choiceOfActionP2", JOptionPane.QUESTION_MESSAGE);
     }
 }
